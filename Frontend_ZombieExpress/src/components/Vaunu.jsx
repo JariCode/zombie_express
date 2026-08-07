@@ -90,12 +90,13 @@ export function Vaunu({ z }) {
       <IkkunaSeina puoli={1} />
 
       {/* Penkit molemmin puolin käytävää, ikkunoiden kohdalla. */}
+      {/* Penkit molemmin puolin käytävää, ikkunoiden kohdalla. */}
       {penkkiRivit.map((pz) => (
         <group key={pz}>
-          {/* Vasen penkki, selkänoja seinää vasten */}
-          <Penkki x={-1.8} z={pz} kaanto={0} />
-          {/* Oikea penkki, selkänoja seinää vasten */}
-          <Penkki x={1.8} z={pz} kaanto={0} />
+          {/* Vasen penkki */}
+          <Penkki x={-1.8} z={pz} kaanto={Math.PI} />
+          {/* Oikea penkki */}
+          <Penkki x={1.8} z={pz} kaanto={Math.PI} />
         </group>
       ))}
     </group>
