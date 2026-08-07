@@ -10,7 +10,7 @@ import { useVahinko } from '../hooks/usePelaajanVahinko'
 // Yksi zombie: liikkuu hitaasti kohti pelaajaa.
 // aloitusZ määrää mihin kohtaan käytävää zombie ilmestyy.
 // id yksilöi zombien. hp/maxHp kestopisteet, malli/scale ulkonäkö.
-// kuoleva = true kun HP loppui; zombie lyyhistyy maahan ja jää ruumiiksi.
+// kuoleva = true kun HP loppui; zombie kaatuu kyljelleen ja jää ruumiiksi.
 // lisaaVeri kutsutaan kun ruumis on kaatunut, jättää verilätäkön.
 export function Zombie({ id, aloitusZ = -15, hp, maxHp, onRef, peliOhi, malli, scale = 0.8, kuoleva, lisaaVeri }) {
   const body = useRef()
@@ -76,19 +76,18 @@ export function Zombie({ id, aloitusZ = -15, hp, maxHp, onRef, peliOhi, malli, s
   useFrame((state, delta) => {
     if (!body.current || !malliRyhma.current) return
 
-    // KUOLEMA: lyyhistyy maahan ja jää ruumiiksi.
+    // KUOLEMA: kaatuu kyljelleen lattialle ja jää ruumiiksi.
     if (kuoleva) {
       kuolinAika.current += delta
 
-      // Kesto noin 1 sekunti, sitten ruumis jää paikalleen.
+      // Kesto noin 1 sekunti.
       const t = Math.min(1, kuolinAika.current / 1)
 
-      // Lyyhistyy: painuu maahan ja nuokahtaa makuulle.
-      malliRyhma.current.position.y = -1 - t * 0.5
-      malliRyhma.current.rotation.x = t * 1.4
-      malliRyhma.current.scale.setScalar(scale * (1 - t * 0.25))
+      // Kaatuu sivulle (kyljelleen) ja laskeutuu lattian pinnalle.
+      malliRyhma.current.rotation.z = t * (Math.PI / 2)
+      malliRyhma.current.position.y = -1 + t * 0.7
 
-      // Kun lyyhistyminen valmis, lisätään verilätäkkö kerran.
+      // Kun kaatuminen valmis, lisätään verilätäkkö kerran.
       if (t >= 1 && !veriLisatty.current) {
         veriLisatty.current = true
         const p = body.current.translation()
@@ -142,7 +141,7 @@ export function Zombie({ id, aloitusZ = -15, hp, maxHp, onRef, peliOhi, malli, s
       position={[0, 1, aloitusZ]}
       enabledRotations={[false, false, false]}
     >
-      <CapsuleCollider args={[0.6, 0.4]} />
+      {!kuoleva && <CapsuleCollider args={[0.6, 0.4]} />}
 
       {/* Kloonattu zombie-malli. */}
       <group ref={malliRyhma} position={[0, -1, 0]} scale={scale}>
