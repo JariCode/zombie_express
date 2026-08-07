@@ -90,3 +90,15 @@
   background: #7a0f0f;
   transition: width 0.15s ease;
 }
+
+.ovi-kehote {
+  padding: 6px 14px;
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid #7a0f0f;
+  color: #eee;
+  font-size: 14px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  pointer-events: none;
+}
