@@ -9,13 +9,18 @@ import { Ampuja } from './Ampuja'
 import { Pistooli } from './Pistooli'
 import { OhiVilistava } from './OhiVilistava'
 import { Verilatakko } from './Verilatakko'
+import { Veriroiske } from './Veriroiske'
 import { useZombit } from '../hooks/useZombit'
+import { useRoiskeet } from '../hooks/useRoiskeet'
 import { VahinkoContext } from '../hooks/usePelaajanVahinko'
 
 // Pelin 3D-näkymä: kamera, valot, fysiikka, juna ja liike.
 export function Peli({ otaVahinkoa, peliOhi }) {
   // Zombie-lista, verilätäköt ja funktiot.
   const { zombit, veret, vahingoitaZombie, lisaaVeri } = useZombit()
+
+  // Osumaroiskeet.
+  const { roiskeet, lisaaRoiske } = useRoiskeet()
 
   // Kaikki zombie-mallit id:n mukaan, jotta ampuja löytää ne.
   const zombieMeshit = useRef({})
@@ -48,6 +53,11 @@ export function Peli({ otaVahinkoa, peliOhi }) {
         <Verilatakko key={v.id} x={v.x} z={v.z} />
       ))}
 
+      {/* Osumaroiskeet. */}
+      {roiskeet.map((r) => (
+        <Veriroiske key={r.id} x={r.x} y={r.y} z={r.z} />
+      ))}
+
       {/* Fysiikkamaailma: kaikki törmäävät objektit tulevat tänne sisään. */}
       <Physics>
         <Juna />
@@ -74,8 +84,8 @@ export function Peli({ otaVahinkoa, peliOhi }) {
         </VahinkoContext.Provider>
       </Physics>
 
-      {/* Ampuminen: klikkaus vähentää zombien hp:tä. */}
-      <Ampuja zombieMeshit={zombieMeshit} onOsuma={vahingoitaZombie} />
+      {/* Ampuminen: klikkaus vähentää zombien hp:tä ja tekee roiskeen. */}
+      <Ampuja zombieMeshit={zombieMeshit} onOsuma={vahingoitaZombie} onRoiske={lisaaRoiske} />
 
       {/* Pelaajan näkyvä ase. */}
       <Pistooli />
