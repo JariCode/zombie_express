@@ -9,6 +9,7 @@ import { Ampuja } from './Ampuja'
 import { OhiVilistava } from './OhiVilistava'
 import { useZombit } from '../hooks/useZombit'
 import { VahinkoContext } from '../hooks/usePelaajanVahinko'
+import { Pistooli } from './Pistooli'
 
 // Pelin 3D-näkymä: kamera, valot, fysiikka, juna ja liike.
 export function Peli({ otaVahinkoa, peliOhi }) {
@@ -67,6 +68,9 @@ export function Peli({ otaVahinkoa, peliOhi }) {
 
       {/* Ampuminen: klikkaus vähentää zombien hp:tä. */}
       <Ampuja zombieMeshit={zombieMeshit} onOsuma={vahingoitaZombie} />
+
+       {/* Pelaajan näkyvä ase. */}
+      <Pistooli />
 
       {/* Lukitsee hiiren ja kääntää katsetta. */}
       <PointerLockControls />
