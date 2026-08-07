@@ -1,4 +1,5 @@
 import { RigidBody } from '@react-three/rapier'
+import { Penkki } from './Penkki'
 
 // Yksi ikkunaseinä: pystypalkkeja joiden väliin jää ikkunat.
 // puoli = -1 vasen seinä, +1 oikea seinä.
@@ -62,9 +63,12 @@ function IkkunaSeina({ puoli }) {
   )
 }
 
-// Yksi junavaunu: lattia, katto ja kaksi ikkunaseinää.
+// Yksi junavaunu: lattia, katto, ikkunaseinät ja penkit.
 // z siirtää vaunun oikeaan kohtaan junassa.
 export function Vaunu({ z }) {
+  // Penkkirivien z-kohdat, ikkunoiden mukaan.
+  const penkkiRivit = [-3, -1, 1, 3]
+
   return (
     <group position={[0, 0, z]}>
       {/* Lattia */}
@@ -88,6 +92,16 @@ export function Vaunu({ z }) {
 
       {/* Oikea ikkunaseinä */}
       <IkkunaSeina puoli={1} />
+
+      {/* Penkit molemmin puolin käytävää, ikkunoiden kohdalla. */}
+      {penkkiRivit.map((pz) => (
+        <group key={pz}>
+          {/* Vasen penkki, selkänoja seinää vasten */}
+          <Penkki x={-1.8} z={pz} kaanto={0} />
+          {/* Oikea penkki, selkänoja seinää vasten */}
+          <Penkki x={1.8} z={pz} kaanto={0} />
+        </group>
+      ))}
     </group>
   )
 }
