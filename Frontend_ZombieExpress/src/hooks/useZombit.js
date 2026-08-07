@@ -6,9 +6,9 @@ const ALKU_HP = 3
 // Hallitsee zombie-listaa: luonti, vahinko ja poisto.
 export function useZombit() {
   const [zombit, setZombit] = useState([
-    { id: 1, aloitusZ: -15, hp: ALKU_HP },
-    { id: 2, aloitusZ: -25, hp: ALKU_HP },
-    { id: 3, aloitusZ: -35, hp: ALKU_HP },
+    { id: 1, aloitusZ: -15, hp: ALKU_HP, maxHp: ALKU_HP },
+    { id: 2, aloitusZ: -25, hp: ALKU_HP, maxHp: ALKU_HP },
+    { id: 3, aloitusZ: -35, hp: ALKU_HP, maxHp: ALKU_HP },
   ])
 
   // Vähentää zombien hp:tä osumasta. Kun hp menee nollaan, zombie poistuu.

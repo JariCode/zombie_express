@@ -1,6 +1,7 @@
 import { useFrame } from '@react-three/fiber'
 import { useRef, useEffect, useState } from 'react'
 import { RigidBody, CapsuleCollider } from '@react-three/rapier'
+import { Html } from '@react-three/drei'
 import * as THREE from 'three'
 import { usePelaajanPaikka } from '../hooks/usePelaajanPaikka'
 import { useVahinko } from '../hooks/usePelaajanVahinko'
@@ -8,8 +9,8 @@ import { useVahinko } from '../hooks/usePelaajanVahinko'
 // Yksi zombie: liikkuu hitaasti kohti pelaajaa.
 // aloitusZ määrää mihin kohtaan käytävää zombie ilmestyy.
 // id yksilöi zombien, jotta oikea voidaan poistaa osuttaessa.
-// hp on jäljellä olevat kestopisteet.
-export function Zombie({ id, aloitusZ = -15, hp, onRef, peliOhi }) {
+// hp on jäljellä olevat kestopisteet, maxHp niiden alkumäärä.
+export function Zombie({ id, aloitusZ = -15, hp, maxHp, onRef, peliOhi }) {
   const body = useRef()
   const mesh = useRef()
   const pelaajanPaikka = usePelaajanPaikka()
@@ -83,6 +84,9 @@ export function Zombie({ id, aloitusZ = -15, hp, onRef, peliOhi }) {
     }
   })
 
+  // HP-palkin täyttöaste prosentteina.
+  const hpProsentti = Math.max(0, (hp / maxHp) * 100)
+
   return (
     <RigidBody
       ref={body}
@@ -101,6 +105,13 @@ export function Zombie({ id, aloitusZ = -15, hp, onRef, peliOhi }) {
           emissiveIntensity={osui ? 1 : 0}
         />
       </mesh>
+
+      {/* HP-palkki zombien pään yläpuolella, kääntyy aina kameraan päin. */}
+      <Html position={[0, 1.3, 0]} center distanceFactor={8}>
+        <div className="zombie-hp">
+          <div className="zombie-hp-fill" style={{ width: `${hpProsentti}%` }} />
+        </div>
+      </Html>
     </RigidBody>
   )
 }

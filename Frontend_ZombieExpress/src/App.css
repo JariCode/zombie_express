@@ -76,3 +76,17 @@
 .alusta-nappi:hover {
   background: #a31515;
 }
+
+.zombie-hp {
+  width: 50px;
+  height: 6px;
+  background: #2a2a2a;
+  border: 1px solid #111;
+  pointer-events: none;
+}
+
+.zombie-hp-fill {
+  height: 100%;
+  background: #7a0f0f;
+  transition: width 0.15s ease;
+}

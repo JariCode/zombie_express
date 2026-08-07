@@ -47,6 +47,7 @@ export function Peli({ otaVahinkoa, peliOhi }) {
               id={z.id}
               aloitusZ={z.aloitusZ}
               hp={z.hp}
+              maxHp={z.maxHp}
               onRef={asetaMesh}
               peliOhi={peliOhi}
             />
