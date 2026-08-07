@@ -1,12 +1,27 @@
 import { Canvas } from '@react-three/fiber'
 import { PointerLockControls } from '@react-three/drei'
 import { Physics } from '@react-three/rapier'
+import { useRef, useCallback } from 'react'
 import { Juna } from './Juna'
 import { Liikkuja } from './Liikkuja'
 import { Zombie } from './Zombie'
+import { Ampuja } from './Ampuja'
+import { useZombit } from '../hooks/useZombit'
 
 // Pelin 3D-näkymä: kamera, valot, fysiikka, juna ja liike.
 export function Peli() {
+  // Zombie-lista ja poistofunktio.
+  const { zombit, poistaZombie } = useZombit()
+
+  // Kaikki zombie-meshit id:n mukaan, jotta ampuja löytää ne.
+  const zombieMeshit = useRef({})
+
+  // Zombie ilmoittaa meshinsä tähän (tai null kun poistuu).
+  const asetaMesh = useCallback((id, mesh) => {
+    if (mesh) zombieMeshit.current[id] = mesh
+    else delete zombieMeshit.current[id]
+  }, [])
+
   return (
     <Canvas camera={{ position: [0, 1.6, 3], fov: 75 }}>
       {/* Himmeä yleisvalo */}
@@ -21,8 +36,15 @@ export function Peli() {
       <Physics>
         <Juna />
         <Liikkuja />
-        <Zombie aloitusZ={-15} />
+
+        {/* Piirretään kaikki listalla olevat zombit. */}
+        {zombit.map((z) => (
+          <Zombie key={z.id} id={z.id} aloitusZ={z.aloitusZ} onRef={asetaMesh} />
+        ))}
       </Physics>
+
+      {/* Ampuminen: klikkaus poistaa zombien johon osuu. */}
+      <Ampuja zombieMeshit={zombieMeshit} onOsuma={poistaZombie} />
 
       {/* Lukitsee hiiren ja kääntää katsetta. */}
       <PointerLockControls />
