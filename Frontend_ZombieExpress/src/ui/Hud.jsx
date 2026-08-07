@@ -7,7 +7,7 @@ export function Hud({ hp, maxHp }) {
     <div className="ui-overlay">
       <div className="crosshair" />
       <div className="hud">
-        Arska
+        Ruben Kaste
         <div className="hud-hp-bar">
           <div className="hud-hp-fill" style={{ width: `${prosentti}%` }} />
         </div>

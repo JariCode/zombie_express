@@ -2,17 +2,18 @@ import { useState, useCallback, useRef } from 'react'
 import { Peli } from './components/Peli'
 import { Hud } from './ui/Hud'
 import { GameOver } from './ui/GameOver'
+import { Intro } from './ui/Intro'
 import './App.css'
 
 function App() {
-  // Pelaajan HP React-tilana, jotta HUD päivittyy.
+  // Pelin vaihe: 'intro' tai 'peli'.
+  const [vaihe, setVaihe] = useState('intro')
+
+  // Pelaajan HP React-tilana.
   const [hp, setHp] = useState(100)
   const maxHp = 100
-
-  // Estää vahingon Game Overin jälkeen.
   const kuollut = useRef(false)
 
-  // Zombie kutsuu tätä kun se puree pelaajaa.
   const otaVahinkoa = useCallback((maara) => {
     if (kuollut.current) return
     setHp((vanha) => {
@@ -22,7 +23,6 @@ function App() {
     })
   }, [])
 
-  // Aloittaa pelin alusta.
   const aloitaAlusta = useCallback(() => {
     kuollut.current = false
     setHp(maxHp)
@@ -32,9 +32,15 @@ function App() {
 
   return (
     <>
-      <Peli otaVahinkoa={otaVahinkoa} peliOhi={peliOhi} />
-      <Hud hp={hp} maxHp={maxHp} />
-      {peliOhi && <GameOver onAloitaAlusta={aloitaAlusta} />}
+      {vaihe === 'intro' && <Intro onValmis={() => setVaihe('peli')} />}
+
+      {vaihe === 'peli' && (
+        <>
+          <Peli otaVahinkoa={otaVahinkoa} peliOhi={peliOhi} />
+          <Hud hp={hp} maxHp={maxHp} />
+          {peliOhi && <GameOver onAloitaAlusta={aloitaAlusta} />}
+        </>
+      )}
     </>
   )
 }

@@ -1,0 +1,167 @@
+.intro {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  z-index: 100;
+  overflow: hidden;
+}
+
+.intro-tausta { position: absolute; inset: 0; }
+
+.teema-juna { background: linear-gradient(180deg, #04060e 0%, #0a1020 55%, #02030a 100%); }
+.teema-uutiset { background: radial-gradient(circle at 50% 40%, #14181f 0%, #070910 70%); }
+.teema-matkustaja { background: linear-gradient(180deg, #0a0808 0%, #120c0c 50%, #050303 100%); }
+.teema-vessa { background: radial-gradient(ellipse at 70% 50%, #1a0d10 0%, #08090e 65%); }
+.teema-ase { background: radial-gradient(circle at 50% 50%, #12161e 0%, #05060c 70%); }
+
+.intro-kuvitus {
+  position: absolute;
+  top: 6%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 92%;
+  max-width: 820px;
+  animation: kuvitus-esiin 1.5s ease;
+}
+@keyframes kuvitus-esiin {
+  from { opacity: 0; transform: translateX(-50%) scale(1.03); }
+  to { opacity: 1; transform: translateX(-50%) scale(1); }
+}
+.kuvitus-svg {
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 10px 40px rgba(0, 0, 0, 0.8));
+}
+
+.vinjetti {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse 85% 75% at 50% 45%, transparent 45%, rgba(0, 0, 0, 0.9) 100%);
+}
+.rae {
+  position: absolute;
+  inset: -10%;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: rae-liike 0.5s steps(2) infinite;
+}
+@keyframes rae-liike {
+  0% { transform: translate(0, 0); }
+  50% { transform: translate(-2%, 1%); }
+  100% { transform: translate(1%, -1%); }
+}
+
+.kuu-hehku { filter: drop-shadow(0 0 25px rgba(200, 215, 255, 0.5)); animation: kuu-syke 6s ease-in-out infinite; }
+@keyframes kuu-syke { 0%, 100% { opacity: 0.85; } 50% { opacity: 1; } }
+.tahti { animation: tahti-tuike 3s ease-in-out infinite; }
+@keyframes tahti-tuike { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.9; } }
+
+.juna-lahesty {
+  transform-origin: 450px 270px;
+  animation: juna-tulo 8s ease-in infinite;
+}
+@keyframes juna-tulo {
+  0% { transform: scale(0.7); opacity: 0.5; }
+  70% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(1.08); opacity: 1; }
+}
+.ajovalo { animation: ajovalo-syke 1.8s ease-in-out infinite; }
+@keyframes ajovalo-syke { 0%, 100% { opacity: 0.85; } 50% { opacity: 1; } }
+.polkky {
+  transform-origin: center;
+  animation: polkky-liuku 1.4s linear infinite;
+}
+@keyframes polkky-liuku {
+  0% { transform: translateY(150px) scaleX(1.6); opacity: 0; }
+  20% { opacity: 0.9; }
+  100% { transform: translateY(0) scaleX(0.4); opacity: 0; }
+}
+
+.uutis-varoitus { animation: varoitus-syke 1.2s ease-in-out infinite; }
+@keyframes varoitus-syke { 0%, 100% { opacity: 0.7; } 50% { opacity: 1; } }
+
+/* Matkustaja huojuu, pää nuokkuu. */
+.matkustaja-huoju {
+  transform-origin: 450px 400px;
+  animation: matkustaja-liike 4s ease-in-out infinite;
+}
+@keyframes matkustaja-liike {
+  0%, 100% { transform: translate(450px, 300px) rotate(-1.5deg); }
+  50% { transform: translate(450px, 302px) rotate(1.5deg); }
+}
+.paa-huoju {
+  transform-origin: 0px -70px;
+  animation: paa-huoju-liike 5s ease-in-out infinite;
+}
+@keyframes paa-huoju-liike {
+  0%, 100% { transform: rotate(-6deg); }
+  50% { transform: rotate(7deg); }
+}
+
+.ovenrako-valo { animation: rako-syke 1.5s ease-in-out infinite; }
+@keyframes rako-syke { 0%, 100% { opacity: 0.2; } 50% { opacity: 0.5; } }
+.aani-aalto { animation: aalto-pulssi 1.8s ease-in-out infinite; }
+@keyframes aalto-pulssi {
+  0%, 100% { opacity: 0.15; transform: translateX(0); }
+  50% { opacity: 0.55; transform: translateX(-10px); }
+}
+
+.ase-esiin { animation: ase-liuku 1.8s ease forwards; }
+@keyframes ase-liuku {
+  from { opacity: 0; transform: translate(450px, 270px); }
+  to { opacity: 1; transform: translate(450px, 250px); }
+}
+.ase-kiilto { animation: kiilto-liike 2.5s ease-in-out infinite; }
+@keyframes kiilto-liike { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.7; } }
+
+.intro-teksti {
+  position: absolute;
+  bottom: 15%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 720px;
+  text-align: center;
+}
+.intro-teksti p {
+  color: #e2e4ea;
+  font-size: 20px;
+  line-height: 1.65;
+  margin-bottom: 14px;
+  opacity: 0;
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.95);
+  animation: teksti-esiin 1.5s ease forwards;
+  letter-spacing: 0.4px;
+}
+@keyframes teksti-esiin {
+  from { opacity: 0; transform: translateY(14px); filter: blur(4px); }
+  to { opacity: 0.94; transform: translateY(0); filter: blur(0); }
+}
+
+.intro-eteneminen {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+}
+.intro-eteneminen span {
+  width: 34px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.12);
+  transition: background 0.6s ease;
+}
+.intro-eteneminen span.aktiivinen { background: rgba(230, 60, 70, 0.7); }
+
+.intro-ohita {
+  position: absolute;
+  bottom: 24px;
+  right: 30px;
+  color: rgba(255, 255, 255, 0.25);
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
