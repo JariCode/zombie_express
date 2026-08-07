@@ -10,8 +10,8 @@ import { useZombit } from '../hooks/useZombit'
 
 // Pelin 3D-näkymä: kamera, valot, fysiikka, juna ja liike.
 export function Peli() {
-  // Zombie-lista ja poistofunktio.
-  const { zombit, poistaZombie } = useZombit()
+  // Zombie-lista ja vahinkofunktio.
+  const { zombit, vahingoitaZombie } = useZombit()
 
   // Kaikki zombie-meshit id:n mukaan, jotta ampuja löytää ne.
   const zombieMeshit = useRef({})
@@ -39,12 +39,18 @@ export function Peli() {
 
         {/* Piirretään kaikki listalla olevat zombit. */}
         {zombit.map((z) => (
-          <Zombie key={z.id} id={z.id} aloitusZ={z.aloitusZ} onRef={asetaMesh} />
+          <Zombie
+            key={z.id}
+            id={z.id}
+            aloitusZ={z.aloitusZ}
+            hp={z.hp}
+            onRef={asetaMesh}
+          />
         ))}
       </Physics>
 
-      {/* Ampuminen: klikkaus poistaa zombien johon osuu. */}
-      <Ampuja zombieMeshit={zombieMeshit} onOsuma={poistaZombie} />
+      {/* Ampuminen: klikkaus vähentää zombien hp:tä. */}
+      <Ampuja zombieMeshit={zombieMeshit} onOsuma={vahingoitaZombie} />
 
       {/* Lukitsee hiiren ja kääntää katsetta. */}
       <PointerLockControls />
