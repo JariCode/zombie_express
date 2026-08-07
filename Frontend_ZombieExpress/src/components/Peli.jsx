@@ -3,6 +3,7 @@ import { PointerLockControls } from '@react-three/drei'
 import { Physics } from '@react-three/rapier'
 import { Juna } from './Juna'
 import { Liikkuja } from './Liikkuja'
+import { Zombie } from './Zombie'
 
 // Pelin 3D-näkymä: kamera, valot, fysiikka, juna ja liike.
 export function Peli() {
@@ -20,6 +21,7 @@ export function Peli() {
       <Physics>
         <Juna />
         <Liikkuja />
+        <Zombie aloitusZ={-15} />
       </Physics>
 
       {/* Lukitsee hiiren ja kääntää katsetta. */}

@@ -3,13 +3,15 @@ import { useRef } from 'react'
 import { RigidBody, CapsuleCollider, useRapier } from '@react-three/rapier'
 import * as THREE from 'three'
 import { useNappaimet } from '../hooks/useNappaimet'
+import { usePelaajanPaikka } from '../hooks/usePelaajanPaikka'
 
 // Pelaaja: näkymätön fyysinen kapseli jota liikutetaan WASD:lla.
 // Kamera seuraa kapselia. Rapier estää liikkeen seinien läpi.
 export function Liikkuja() {
   const { camera } = useThree()
-  const { world, rapier } = useRapier()
+  const { world } = useRapier()
   const napit = useNappaimet()
+  const pelaajanPaikka = usePelaajanPaikka()
 
   const body = useRef()
   const controller = useRef()
@@ -59,6 +61,9 @@ export function Liikkuja() {
 
     // Kamera seuraa kapselia, silmien korkeudella.
     camera.position.set(paikka.x, paikka.y + 0.8, paikka.z)
+
+    // Päivitetään jaettu pelaajan paikka, jotta zombiet löytävät pelaajan.
+    pelaajanPaikka.set(paikka.x, paikka.y, paikka.z)
   })
 
   return (
