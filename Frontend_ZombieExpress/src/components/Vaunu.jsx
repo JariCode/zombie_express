@@ -3,7 +3,7 @@ import { Penkki } from './Penkki'
 import { Ovi } from './Ovi'
 
 // Vaunun pituus z-akselilla. Vaunu ulottuu -PITUUS/2 .. +PITUUS/2.
-const PITUUS = 30
+const PITUUS = 44
 
 // Yksi ikkunaseinä: pystypalkkeja joiden väliin jää ikkunat.
 // puoli = -1 vasen seinä, +1 oikea seinä.
@@ -12,11 +12,11 @@ function IkkunaSeina({ puoli }) {
 
   // Ikkunat tasavälein vaunun pituudella.
   const ikkunat = []
-  for (let zi = -12; zi <= 12; zi += 3) ikkunat.push(zi)
+  for (let zi = -19; zi <= 19; zi += 3.8) ikkunat.push(zi)
 
   // Pystypalkit ikkunoiden väleissä.
   const palkit = []
-  for (let zi = -13.5; zi <= 13.5; zi += 3) palkit.push(zi)
+  for (let zi = -20.9; zi <= 20.9; zi += 3.8) palkit.push(zi)
 
   return (
     <group>
@@ -64,14 +64,13 @@ function IkkunaSeina({ puoli }) {
   )
 }
 
-// Yksi junavaunu: lattia, katto, ikkunaseinät, penkit ja päätyovet.
+// Yksi junavaunu: lattia, katto, valot, ikkunaseinät, penkit ja päätyovet.
 // z siirtää vaunun oikeaan kohtaan junassa.
 export function Vaunu({ z }) {
-  // 20 penkkiriviä tasavälein vaunun pituudella.
+  // 20 penkkiriviä tasavälein, jättäen tilaa ovien eteen.
   const penkkiRivit = []
   for (let i = 0; i < 20; i++) {
-    // Rivit väliltä -13 .. +13, tasavälein.
-    penkkiRivit.push(-13 + i * (26 / 19))
+    penkkiRivit.push(-19 + i * (38 / 19))
   }
 
   return (
@@ -91,6 +90,12 @@ export function Vaunu({ z }) {
           <meshStandardMaterial color="#1a1512" />
         </mesh>
       </RigidBody>
+
+      {/* Kattolamput vaunun sisällä, tasavälein pituudella. */}
+      <pointLight position={[0, 2.7, -14]} intensity={20} distance={18} color="#ffd8a8" />
+      <pointLight position={[0, 2.7, -4]} intensity={20} distance={18} color="#ffd8a8" />
+      <pointLight position={[0, 2.7, 6]} intensity={20} distance={18} color="#ffd8a8" />
+      <pointLight position={[0, 2.7, 16]} intensity={20} distance={18} color="#ffd8a8" />
 
       {/* Ikkunaseinät molemmin puolin */}
       <IkkunaSeina puoli={-1} />

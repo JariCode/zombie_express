@@ -36,13 +36,8 @@ export function Peli({ otaVahinkoa, peliOhi }) {
       {/* Yön musta taivas taustalla. */}
       <color attach="background" args={['#02020a']} />
 
-      {/* Himmeä yleisvalo */}
-      <ambientLight intensity={0.3} />
-
-      {/* Kattolamput vaunun sisällä, tasavälein pituudella. */}
-      <pointLight position={[0, 2.7, -10]} intensity={15} distance={14} color="#ffd8a8" />
-      <pointLight position={[0, 2.7, 0]} intensity={15} distance={14} color="#ffd8a8" />
-      <pointLight position={[0, 2.7, 10]} intensity={15} distance={14} color="#ffd8a8" />
+      {/* Yleisvalo joka valaisee kaiken tasaisesti. */}
+      <ambientLight intensity={0.5} />
 
       {/* Ohi vilistävä öinen maisema molemmin puolin junaa. */}
       <OhiVilistava puoli={-1} nopeus={22} />

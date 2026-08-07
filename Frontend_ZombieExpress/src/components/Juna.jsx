@@ -1,8 +1,8 @@
 import { Vaunu } from './Vaunu'
 
-// Koko juna: monta vaunua peräkkäin. Vaunun pituus 30, joten väli 30.
+// Koko juna: vaunut peräkkäin. Vaunun pituus 44, joten väli 44.
 export function Juna() {
-  const zPaikat = [0, -30, -60]
+  const zPaikat = [0, -44, -88]
   return (
     <>
       {zPaikat.map((z) => (
