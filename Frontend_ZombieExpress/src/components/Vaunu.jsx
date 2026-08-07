@@ -48,17 +48,13 @@ function IkkunaSeina({ puoli }) {
               transparent
               opacity={0.4}
               roughness={0.1}
-              metalness={0.3}
+              metalness={0}
             />
           </mesh>
         </RigidBody>
       ))}
 
-      {/* Öinen taustaseinä ikkunoiden takana. */}
-      <mesh position={[puoli * 3.7, 1.5, 0]}>
-        <boxGeometry args={[0.1, 3, 10]} />
-        <meshStandardMaterial color="#05050a" />
-      </mesh>
+ 
     </group>
   )
 }
