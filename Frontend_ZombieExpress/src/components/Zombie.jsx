@@ -9,10 +9,10 @@ import { useVahinko } from '../hooks/usePelaajanVahinko'
 
 // Yksi zombie: liikkuu hitaasti kohti pelaajaa.
 // aloitusZ määrää mihin kohtaan käytävää zombie ilmestyy.
-// id yksilöi zombien, jotta oikea voidaan poistaa osuttaessa.
-// hp on jäljellä olevat kestopisteet, maxHp niiden alkumäärä.
-// malli on polku tämän zombien 3D-malliin, scale sen koko.
-export function Zombie({ id, aloitusZ = -15, hp, maxHp, onRef, peliOhi, malli, scale = 0.8 }) {
+// id yksilöi zombien. hp/maxHp kestopisteet, malli/scale ulkonäkö.
+// kuoleva = true kun HP loppui; zombie lyyhistyy maahan ja jää ruumiiksi.
+// lisaaVeri kutsutaan kun ruumis on kaatunut, jättää verilätäkön.
+export function Zombie({ id, aloitusZ = -15, hp, maxHp, onRef, peliOhi, malli, scale = 0.8, kuoleva, lisaaVeri }) {
   const body = useRef()
   const malliRyhma = useRef()
   const pelaajanPaikka = usePelaajanPaikka()
@@ -20,20 +20,20 @@ export function Zombie({ id, aloitusZ = -15, hp, maxHp, onRef, peliOhi, malli, s
   const suunta = useRef(new THREE.Vector3())
   const puremaAjastin = useRef(0)
 
+  // Kuoleman eteneminen 0..1.
+  const kuolinAika = useRef(0)
+  const veriLisatty = useRef(false)
+
   // Ladataan malli ja animaatiot.
   const { scene, animations } = useGLTF(malli)
-
-  // Kloonataan malli, jotta jokaisella zombiella on oma kopio.
-  // Ilman tätä samaa mallia käyttävät zombit näkyisivät haamuina.
   const klooni = useMemo(() => SkeletonUtils.clone(scene), [scene])
-
   const { actions, names } = useAnimations(animations, malliRyhma)
 
   // Osumavälähdys.
   const [osui, setOsui] = useState(false)
   const ekaRender = useRef(true)
 
-  // Käynnistetään ensimmäinen animaatio.
+  // Käynnistetään ensimmäinen animaatio (kävely/idle).
   useEffect(() => {
     if (names.length > 0 && actions[names[0]]) {
       actions[names[0]].reset().play()
@@ -64,8 +64,39 @@ export function Zombie({ id, aloitusZ = -15, hp, maxHp, onRef, peliOhi, malli, s
     return () => clearTimeout(ajastin)
   }, [hp])
 
+  // Kun kuolema alkaa, jäädytetään animaatio paikalleen.
+  useEffect(() => {
+    if (kuoleva) {
+      Object.values(actions).forEach((a) => {
+        if (a) a.paused = true
+      })
+    }
+  }, [kuoleva, actions])
+
   useFrame((state, delta) => {
-    if (!body.current) return
+    if (!body.current || !malliRyhma.current) return
+
+    // KUOLEMA: lyyhistyy maahan ja jää ruumiiksi.
+    if (kuoleva) {
+      kuolinAika.current += delta
+
+      // Kesto noin 1 sekunti, sitten ruumis jää paikalleen.
+      const t = Math.min(1, kuolinAika.current / 1)
+
+      // Lyyhistyy: painuu maahan ja nuokahtaa makuulle.
+      malliRyhma.current.position.y = -1 - t * 0.5
+      malliRyhma.current.rotation.x = t * 1.4
+      malliRyhma.current.scale.setScalar(scale * (1 - t * 0.25))
+
+      // Kun lyyhistyminen valmis, lisätään verilätäkkö kerran.
+      if (t >= 1 && !veriLisatty.current) {
+        veriLisatty.current = true
+        const p = body.current.translation()
+        if (lisaaVeri) lisaaVeri(id, { x: p.x, z: p.z })
+      }
+      return
+    }
+
     if (peliOhi) return
 
     const paikka = body.current.translation()
@@ -81,10 +112,8 @@ export function Zombie({ id, aloitusZ = -15, hp, maxHp, onRef, peliOhi, malli, s
     suunta.current.normalize()
 
     // Käännetään malli katsomaan pelaajaa kohti.
-    if (malliRyhma.current) {
-      const kulma = Math.atan2(suunta.current.x, suunta.current.z)
-      malliRyhma.current.rotation.y = kulma
-    }
+    const kulma = Math.atan2(suunta.current.x, suunta.current.z)
+    malliRyhma.current.rotation.y = kulma
 
     // Jos lähellä, puree kerran sekunnissa. Muuten liikkuu kohti.
     puremaAjastin.current -= delta
@@ -120,12 +149,14 @@ export function Zombie({ id, aloitusZ = -15, hp, maxHp, onRef, peliOhi, malli, s
         <primitive object={klooni} />
       </group>
 
-      {/* HP-palkki pään yläpuolella. */}
-      <Html position={[0, 1.3, 0]} center distanceFactor={8}>
-        <div className="zombie-hp">
-          <div className="zombie-hp-fill" style={{ width: `${hpProsentti}%` }} />
-        </div>
-      </Html>
+      {/* HP-palkki pään yläpuolella, piilotetaan kuollessa. */}
+      {!kuoleva && (
+        <Html position={[0, 1.3, 0]} center distanceFactor={8}>
+          <div className="zombie-hp">
+            <div className="zombie-hp-fill" style={{ width: `${hpProsentti}%` }} />
+          </div>
+        </Html>
+      )}
     </RigidBody>
   )
 }

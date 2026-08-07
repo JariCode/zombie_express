@@ -6,15 +6,16 @@ import { Juna } from './Juna'
 import { Liikkuja } from './Liikkuja'
 import { Zombie } from './Zombie'
 import { Ampuja } from './Ampuja'
+import { Pistooli } from './Pistooli'
 import { OhiVilistava } from './OhiVilistava'
+import { Verilatakko } from './Verilatakko'
 import { useZombit } from '../hooks/useZombit'
 import { VahinkoContext } from '../hooks/usePelaajanVahinko'
-import { Pistooli } from './Pistooli'
 
 // Pelin 3D-näkymä: kamera, valot, fysiikka, juna ja liike.
 export function Peli({ otaVahinkoa, peliOhi }) {
-  // Zombie-lista ja vahinkofunktio.
-  const { zombit, vahingoitaZombie } = useZombit()
+  // Zombie-lista, verilätäköt ja funktiot.
+  const { zombit, veret, vahingoitaZombie, lisaaVeri } = useZombit()
 
   // Kaikki zombie-mallit id:n mukaan, jotta ampuja löytää ne.
   const zombieMeshit = useRef({})
@@ -42,6 +43,11 @@ export function Peli({ otaVahinkoa, peliOhi }) {
       <OhiVilistava puoli={-1} nopeus={22} />
       <OhiVilistava puoli={1} nopeus={22} />
 
+      {/* Verilätäköt kuolleiden zombien kohdilla. */}
+      {veret.map((v) => (
+        <Verilatakko key={v.id} x={v.x} z={v.z} />
+      ))}
+
       {/* Fysiikkamaailma: kaikki törmäävät objektit tulevat tänne sisään. */}
       <Physics>
         <Juna />
@@ -59,6 +65,8 @@ export function Peli({ otaVahinkoa, peliOhi }) {
               maxHp={z.maxHp}
               malli={z.malli}
               scale={z.scale}
+              kuoleva={z.kuoleva}
+              lisaaVeri={lisaaVeri}
               onRef={asetaMesh}
               peliOhi={peliOhi}
             />
@@ -69,7 +77,7 @@ export function Peli({ otaVahinkoa, peliOhi }) {
       {/* Ampuminen: klikkaus vähentää zombien hp:tä. */}
       <Ampuja zombieMeshit={zombieMeshit} onOsuma={vahingoitaZombie} />
 
-       {/* Pelaajan näkyvä ase. */}
+      {/* Pelaajan näkyvä ase. */}
       <Pistooli />
 
       {/* Lukitsee hiiren ja kääntää katsetta. */}
