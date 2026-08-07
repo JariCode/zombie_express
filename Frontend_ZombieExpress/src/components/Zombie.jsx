@@ -3,16 +3,21 @@ import { useRef, useEffect, useState } from 'react'
 import { RigidBody, CapsuleCollider } from '@react-three/rapier'
 import * as THREE from 'three'
 import { usePelaajanPaikka } from '../hooks/usePelaajanPaikka'
+import { useVahinko } from '../hooks/usePelaajanVahinko'
 
 // Yksi zombie: liikkuu hitaasti kohti pelaajaa.
 // aloitusZ määrää mihin kohtaan käytävää zombie ilmestyy.
 // id yksilöi zombien, jotta oikea voidaan poistaa osuttaessa.
 // hp on jäljellä olevat kestopisteet.
-export function Zombie({ id, aloitusZ = -15, hp, onRef }) {
+export function Zombie({ id, aloitusZ = -15, hp, onRef, peliOhi }) {
   const body = useRef()
   const mesh = useRef()
   const pelaajanPaikka = usePelaajanPaikka()
+  const otaVahinkoa = useVahinko()
   const suunta = useRef(new THREE.Vector3())
+
+  // Aika edellisestä puremasta, ettei vahinko tule joka framessa.
+  const puremaAjastin = useRef(0)
 
   // Osumavälähdys: kun hp pienenee, zombie hohtaa hetken punaisena.
   const [osui, setOsui] = useState(false)
@@ -43,6 +48,9 @@ export function Zombie({ id, aloitusZ = -15, hp, onRef }) {
   useFrame((state, delta) => {
     if (!body.current) return
 
+    // Kun peli on ohi, zombie pysähtyy.
+    if (peliOhi) return
+
     const paikka = body.current.translation()
     const zombie = new THREE.Vector3(paikka.x, paikka.y, paikka.z)
 
@@ -52,15 +60,27 @@ export function Zombie({ id, aloitusZ = -15, hp, onRef }) {
       0,
       pelaajanPaikka.z - zombie.z
     )
+
+    // Etäisyys pelaajaan.
+    const etaisyys = suunta.current.length()
     suunta.current.normalize()
 
-    // Liikutetaan zombieta pelaajaa kohti.
-    const nopeus = 1.5 * delta
-    body.current.setNextKinematicTranslation({
-      x: paikka.x + suunta.current.x * nopeus,
-      y: paikka.y,
-      z: paikka.z + suunta.current.z * nopeus,
-    })
+    // Jos tarpeeksi lähellä, zombie puree kerran sekunnissa.
+    puremaAjastin.current -= delta
+    if (etaisyys < 1.5) {
+      if (puremaAjastin.current <= 0) {
+        otaVahinkoa(10)
+        puremaAjastin.current = 1
+      }
+    } else {
+      // Liikutetaan zombieta pelaajaa kohti vain jos ei vielä kiinni.
+      const nopeus = 1.5 * delta
+      body.current.setNextKinematicTranslation({
+        x: paikka.x + suunta.current.x * nopeus,
+        y: paikka.y,
+        z: paikka.z + suunta.current.z * nopeus,
+      })
+    }
   })
 
   return (

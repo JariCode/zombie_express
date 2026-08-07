@@ -60,3 +60,19 @@
   font-size: 16px;
   opacity: 0.8;
 }
+
+.alusta-nappi {
+  margin-top: 24px;
+  padding: 12px 28px;
+  font-size: 16px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #eee;
+  background: #7a0f0f;
+  border: 1px solid #a31515;
+  cursor: pointer;
+}
+
+.alusta-nappi:hover {
+  background: #a31515;
+}

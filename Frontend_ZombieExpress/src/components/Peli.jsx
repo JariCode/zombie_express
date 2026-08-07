@@ -7,9 +7,10 @@ import { Liikkuja } from './Liikkuja'
 import { Zombie } from './Zombie'
 import { Ampuja } from './Ampuja'
 import { useZombit } from '../hooks/useZombit'
+import { VahinkoContext } from '../hooks/usePelaajanVahinko'
 
 // Pelin 3D-näkymä: kamera, valot, fysiikka, juna ja liike.
-export function Peli() {
+export function Peli({ otaVahinkoa, peliOhi }) {
   // Zombie-lista ja vahinkofunktio.
   const { zombit, vahingoitaZombie } = useZombit()
 
@@ -37,16 +38,20 @@ export function Peli() {
         <Juna />
         <Liikkuja />
 
-        {/* Piirretään kaikki listalla olevat zombit. */}
-        {zombit.map((z) => (
-          <Zombie
-            key={z.id}
-            id={z.id}
-            aloitusZ={z.aloitusZ}
-            hp={z.hp}
-            onRef={asetaMesh}
-          />
-        ))}
+        {/* Vahinkofunktio zombeille contextin kautta. */}
+        <VahinkoContext.Provider value={otaVahinkoa}>
+          {/* Piirretään kaikki listalla olevat zombit. */}
+          {zombit.map((z) => (
+            <Zombie
+              key={z.id}
+              id={z.id}
+              aloitusZ={z.aloitusZ}
+              hp={z.hp}
+              onRef={asetaMesh}
+              peliOhi={peliOhi}
+            />
+          ))}
+        </VahinkoContext.Provider>
       </Physics>
 
       {/* Ampuminen: klikkaus vähentää zombien hp:tä. */}
