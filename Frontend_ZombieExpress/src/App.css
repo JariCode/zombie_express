@@ -1,0 +1,62 @@
+.ui-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.crosshair {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  margin: -3px 0 0 -3px;
+  background: #e63946;
+  border-radius: 50%;
+  opacity: 0.85;
+}
+
+.hud {
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  font-size: 14px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.hud-hp-bar {
+  width: 220px;
+  height: 14px;
+  margin-top: 6px;
+  background: #2a2a2a;
+  border: 1px solid #444;
+}
+
+.hud-hp-fill {
+  height: 100%;
+  background: #7a0f0f;
+  transition: width 0.2s ease;
+}
+
+.center-message {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  pointer-events: auto;
+}
+
+.center-message h1 {
+  font-size: 42px;
+  letter-spacing: 4px;
+  margin-bottom: 16px;
+  color: #e63946;
+}
+
+.center-message p {
+  font-size: 16px;
+  opacity: 0.8;
+}

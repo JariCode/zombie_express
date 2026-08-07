@@ -1,0 +1,28 @@
+# Logit
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Riippuvuudet ja buildit
+node_modules
+dist
+dist-ssr
+*.local
+package-lock.json
+
+# Ympäristömuuttujat (sekä frontti että backend)
+.env
+.env.local
+
+# Editorit ja käyttöjärjestelmä
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
