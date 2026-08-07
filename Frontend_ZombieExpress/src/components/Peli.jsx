@@ -15,10 +15,10 @@ export function Peli({ otaVahinkoa, peliOhi }) {
   // Zombie-lista ja vahinkofunktio.
   const { zombit, vahingoitaZombie } = useZombit()
 
-  // Kaikki zombie-meshit id:n mukaan, jotta ampuja löytää ne.
+  // Kaikki zombie-mallit id:n mukaan, jotta ampuja löytää ne.
   const zombieMeshit = useRef({})
 
-  // Zombie ilmoittaa meshinsä tähän (tai null kun poistuu).
+  // Zombie ilmoittaa mallinsa tähän (tai null kun poistuu).
   const asetaMesh = useCallback((id, mesh) => {
     if (mesh) zombieMeshit.current[id] = mesh
     else delete zombieMeshit.current[id]
@@ -56,6 +56,8 @@ export function Peli({ otaVahinkoa, peliOhi }) {
               aloitusZ={z.aloitusZ}
               hp={z.hp}
               maxHp={z.maxHp}
+              malli={z.malli}
+              scale={z.scale}
               onRef={asetaMesh}
               peliOhi={peliOhi}
             />
