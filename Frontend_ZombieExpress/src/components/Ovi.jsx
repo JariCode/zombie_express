@@ -64,10 +64,47 @@ export function Ovi({ z, worldZ }) {
 
       {/* Liukuova aukossa. Kiinteä kun kiinni, läpi kun auki. */}
       <RigidBody type="fixed" colliders={auki ? false : 'cuboid'}>
-        <mesh ref={ovilevy} position={[0, 1.2, 0]}>
-          <boxGeometry args={[1.4, 2.4, 0.1]} />
-          <meshStandardMaterial color="#3a3a45" metalness={0.6} roughness={0.4} />
-        </mesh>
+        <group ref={ovilevy} position={[0, 1.2, 0]}>
+          {/* Oven runko */}
+          <mesh>
+            <boxGeometry args={[1.4, 2.4, 0.1]} />
+            <meshStandardMaterial color="#3a3a45" metalness={0.6} roughness={0.4} />
+          </mesh>
+          {/* Ikkuna oven yläosassa */}
+          <mesh position={[0, 0.55, 0.02]}>
+            <boxGeometry args={[0.9, 0.9, 0.08]} />
+            <meshStandardMaterial color="#0a0a14" transparent opacity={0.5} roughness={0.1} />
+          </mesh>
+          {/* Ikkunan kehys */}
+          <mesh position={[0, 0.55, 0.04]}>
+            <boxGeometry args={[1.0, 1.0, 0.04]} />
+            <meshStandardMaterial color="#26262e" metalness={0.5} roughness={0.5} />
+          </mesh>
+          {/* Ikkunan lasi kehyksen päälle (jotta lasi näkyy kehyksen sisällä) */}
+          <mesh position={[0, 0.55, 0.05]}>
+            <boxGeometry args={[0.88, 0.88, 0.02]} />
+            <meshStandardMaterial color="#0a0e18" transparent opacity={0.45} roughness={0.1} />
+          </mesh>
+          {/* Kahva (pystytanko) käytävän puolella */}
+          <mesh position={[0.5, -0.1, 0.08]}>
+            <cylinderGeometry args={[0.03, 0.03, 0.5, 8]} />
+            <meshStandardMaterial color="#6a6a72" metalness={0.8} roughness={0.3} />
+          </mesh>
+          {/* Kahvan kiinnikkeet */}
+          <mesh position={[0.5, 0.13, 0.05]} rotation={[0, 0, Math.PI / 2]}>
+            <cylinderGeometry args={[0.02, 0.02, 0.08, 8]} />
+            <meshStandardMaterial color="#6a6a72" metalness={0.8} roughness={0.3} />
+          </mesh>
+          <mesh position={[0.5, -0.33, 0.05]} rotation={[0, 0, Math.PI / 2]}>
+            <cylinderGeometry args={[0.02, 0.02, 0.08, 8]} />
+            <meshStandardMaterial color="#6a6a72" metalness={0.8} roughness={0.3} />
+          </mesh>
+          {/* Alareunan lista */}
+          <mesh position={[0, -1.05, 0.03]}>
+            <boxGeometry args={[1.4, 0.15, 0.06]} />
+            <meshStandardMaterial color="#26262e" metalness={0.5} roughness={0.5} />
+          </mesh>
+        </group>
       </RigidBody>
 
       {/* Kehote kun lähellä. */}
