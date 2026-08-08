@@ -103,7 +103,7 @@ export function Vaunu({ z }) {
     <group position={[0, 0, z]}>
       {/* Lattia */}
       <RigidBody type="fixed" colliders="cuboid">
-        <mesh position={[0, 0, 0]}>
+        <mesh position={[0, 0, 0]} receiveShadow>
           <boxGeometry args={[6, 0.2, PITUUS]} />
           <meshStandardMaterial color="#2a2320" />
         </mesh>

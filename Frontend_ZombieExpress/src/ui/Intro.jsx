@@ -8,7 +8,7 @@ const KOHTAUKSET = [
     'Yöjuna halkoo pimeää maisemaa kohti Müncheniä.',
   ]},
   { kesto: 8500, teema: 'juna', tekstit: [
-    'Yksityisetsivä Ruben Kaste istuu lähes tyhjässä vaunussa.',
+    'Yksityisetsivä Ruben Kaarna istuu lähes tyhjässä vaunussa.',
     'Hän on matkalla sukulaistensa luo Saksaan — ensimmäistä kertaa vuosiin pois töiden parista.',
   ]},
   { kesto: 9000, teema: 'uutiset', tekstit: [
