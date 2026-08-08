@@ -101,13 +101,43 @@ export function Vaunu({ z }) {
 
   return (
     <group position={[0, 0, z]}>
-      {/* Lattia */}
+      {/* Lattia (törmäyspinta) */}
       <RigidBody type="fixed" colliders="cuboid">
         <mesh position={[0, 0, 0]} receiveShadow>
           <boxGeometry args={[6, 0.2, PITUUS]} />
-          <meshStandardMaterial color="#2a2320" />
+          <meshStandardMaterial color="#241d19" />
         </mesh>
       </RigidBody>
+
+      {/* Penkkialueiden lattia molemmin puolin, hieman vaaleampi */}
+      <mesh position={[-1.9, 0.101, 0]} receiveShadow>
+        <boxGeometry args={[2.2, 0.01, PITUUS]} />
+        <meshStandardMaterial color="#2e2620" roughness={0.95} />
+      </mesh>
+      <mesh position={[1.9, 0.101, 0]} receiveShadow>
+        <boxGeometry args={[2.2, 0.01, PITUUS]} />
+        <meshStandardMaterial color="#2e2620" roughness={0.95} />
+      </mesh>
+
+      {/* Keskikäytävän kulkuraita, tummempi kulunut matto */}
+      <mesh position={[0, 0.102, 0]} receiveShadow>
+        <boxGeometry args={[1.9, 0.012, PITUUS]} />
+        <meshStandardMaterial color="#1a1512" roughness={1} />
+      </mesh>
+      {/* Käytävän reunalistat, vaaleammat metallireunukset */}
+      {[-0.95, 0.95].map((rx) => (
+        <mesh key={rx} position={[rx, 0.108, 0]}>
+          <boxGeometry args={[0.06, 0.012, PITUUS]} />
+          <meshStandardMaterial color="#3a3a40" roughness={0.5} metalness={0.5} />
+        </mesh>
+      ))}
+      {/* Pituussuuntaiset raidat käytävämatossa */}
+      {[-0.5, 0, 0.5].map((rx) => (
+        <mesh key={`r${rx}`} position={[rx, 0.109, 0]}>
+          <boxGeometry args={[0.02, 0.012, PITUUS]} />
+          <meshStandardMaterial color="#0f0c0a" roughness={1} />
+        </mesh>
+      ))}
 
       {/* Katto */}
       <RigidBody type="fixed" colliders="cuboid">
