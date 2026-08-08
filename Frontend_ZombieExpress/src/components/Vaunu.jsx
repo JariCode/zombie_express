@@ -60,6 +60,32 @@ function IkkunaSeina({ puoli }) {
           </mesh>
         </RigidBody>
       ))}
+     {/* Matkatavarateline ikkunoiden yläpuolella, suora vaakahylly. */}
+      {/* Hyllytaso, työntyy seinästä käytävälle päin */}
+      <mesh position={[x - puoli * 0.45, 2.3, 0]}>
+        <boxGeometry args={[0.7, 0.05, PITUUS - 2]} />
+        <meshStandardMaterial color="#2a2420" roughness={0.6} metalness={0.3} />
+      </mesh>
+      {/* Etureunan putki, estää laukkuja putoamasta */}
+      <mesh position={[x - puoli * 0.78, 2.42, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <cylinderGeometry args={[0.03, 0.03, PITUUS - 2, 8]} />
+        <meshStandardMaterial color="#3a3a40" roughness={0.4} metalness={0.6} />
+      </mesh>
+      {/* Kannatinraudat seinästä hyllyyn, pystysuorat kolmiot */}
+      {palkit.map((zi) => (
+        <mesh key={`kannatin-${zi}`} position={[x - puoli * 0.4, 2.15, zi]}>
+          <boxGeometry args={[0.7, 0.04, 0.04]} />
+          <meshStandardMaterial color="#3a3a40" roughness={0.4} metalness={0.6} />
+        </mesh>
+      ))}
+      {/* Matkalaukkuja hyllyllä, suorassa */}
+      {[-15, -6, 3, 14].map((lz, li) => (
+        <mesh key={`laukku-${lz}`}
+          position={[x - puoli * 0.45, 2.5, lz]}>
+          <boxGeometry args={[0.5, 0.32, 0.7 + (li % 2) * 0.3]} />
+          <meshStandardMaterial color={li % 2 === 0 ? '#2a2018' : '#20242a'} roughness={0.8} />
+        </mesh>
+      ))}
     </group>
   )
 }
