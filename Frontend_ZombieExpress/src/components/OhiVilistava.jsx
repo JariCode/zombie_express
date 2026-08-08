@@ -6,39 +6,39 @@ import { useRef, useMemo } from 'react'
 // puoli = -1 vasen, +1 oikea. nopeus = liikkeen vauhti.
 export function OhiVilistava({ puoli = -1, nopeus = 20 }) {
   // Kuinka pitkälle maisema ulottuu junan suuntaisesti.
-  const alku = -60
-  const loppu = 20
+  const alku = -100
+  const loppu = 30
   const pituus = loppu - alku
 
-  // Luodaan siluetit kerran: satunnaiset kohdat, korkeudet ja etäisyydet.
-  const siluetit = useMemo(() => {
+  // Luodaan kohteet kerran: puita ja pylväitä satunnaisilla mitoilla.
+  const kohteet = useMemo(() => {
     const lista = []
-    const maara = 30
+    const maara = 40
     for (let i = 0; i < maara; i++) {
+      const puu = Math.random() > 0.35
+      const etaisyys = 5 + Math.random() * 14
       lista.push({
         z: alku + Math.random() * pituus,
-        korkeus: 3 + Math.random() * 5,
-        leveys: 0.4 + Math.random() * 0.7,
-        etaisyys: 5 + Math.random() * 10,
-        // Vaaleampi = kauempana (utuisempi), tummempi = lähempänä.
-        vari: Math.random() > 0.5 ? '#0d1a12' : '#0a0f14',
+        etaisyys,
+        puu,
+        korkeus: puu ? 4 + Math.random() * 4 : 3 + Math.random() * 3,
+        latvusKoko: 1.2 + Math.random() * 1.3,
+        runkoLeveys: 0.2 + Math.random() * 0.2,
+        // Kauempana olevat vaaleampia (utuisia), lähellä tummempia.
+        vari: etaisyys > 12 ? '#111820' : '#0a0f14',
+        kallistus: (Math.random() - 0.5) * 0.15,
       })
     }
     return lista
   }, [])
 
-  // Refit jokaiseen siluettiin, jotta niitä voi liikuttaa.
   const refit = useRef([])
 
   useFrame((state, delta) => {
-    for (let i = 0; i < siluetit.length; i++) {
+    for (let i = 0; i < kohteet.length; i++) {
       const ref = refit.current[i]
       if (!ref) continue
-
-      // Liikutetaan siluettia junan suuntaisesti.
       ref.position.z += nopeus * delta
-
-      // Kun siluetti ohittaa pään, kierrätetään takaisin alkuun.
       if (ref.position.z > loppu) {
         ref.position.z = alku
       }
@@ -47,22 +47,58 @@ export function OhiVilistava({ puoli = -1, nopeus = 20 }) {
 
   return (
     <group>
-      {/* Tumma maanpinta horisontissa, tuo syvyyttä. */}
-      <mesh position={[puoli * 12, -1, -20]} rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[24, 90]} />
-        <meshBasicMaterial color="#060a08" />
+      {/* Tumma maanpinta joka häipyy horisonttiin. */}
+      <mesh position={[puoli * 14, -1, -35]} rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[30, 140]} />
+        <meshBasicMaterial color="#070b09" />
       </mesh>
 
-      {siluetit.map((s, i) => (
-        <mesh
+      {/* Kaukainen sumuseinä horisontissa, häivyttää maiseman reunan. */}
+      <mesh position={[puoli * 20, 3, -50]}>
+        <planeGeometry args={[60, 20]} />
+        <meshBasicMaterial color="#0a0e14" transparent opacity={0.6} />
+      </mesh>
+
+      {kohteet.map((k, i) => (
+        <group
           key={i}
           ref={(el) => (refit.current[i] = el)}
-          position={[puoli * s.etaisyys, s.korkeus / 2 - 1, s.z]}
+          position={[puoli * k.etaisyys, -1, k.z]}
+          rotation={[0, 0, k.kallistus]}
         >
-          {/* meshBasicMaterial näkyy ilman valoa, joten puut erottuvat aina. */}
-          <boxGeometry args={[s.leveys, s.korkeus, s.leveys]} />
-          <meshBasicMaterial color={s.vari} />
-        </mesh>
+          {k.puu ? (
+            <>
+              {/* Puun runko */}
+              <mesh position={[0, k.korkeus * 0.4, 0]}>
+                <cylinderGeometry args={[k.runkoLeveys * 0.7, k.runkoLeveys, k.korkeus * 0.8, 6]} />
+                <meshBasicMaterial color={k.vari} />
+              </mesh>
+              {/* Latvus, kartiomainen havupuu */}
+              <mesh position={[0, k.korkeus * 0.85, 0]}>
+                <coneGeometry args={[k.latvusKoko, k.korkeus * 0.9, 7]} />
+                <meshBasicMaterial color={k.vari} />
+              </mesh>
+              {/* Toinen latvuskerros alempana, tuuheus */}
+              <mesh position={[0, k.korkeus * 0.6, 0]}>
+                <coneGeometry args={[k.latvusKoko * 1.2, k.korkeus * 0.6, 7]} />
+                <meshBasicMaterial color={k.vari} />
+              </mesh>
+            </>
+          ) : (
+            <>
+              {/* Pylväs / lyhtypylväs */}
+              <mesh position={[0, k.korkeus / 2, 0]}>
+                <cylinderGeometry args={[0.12, 0.15, k.korkeus, 6]} />
+                <meshBasicMaterial color={k.vari} />
+              </mesh>
+              {/* Poikkipuu ylhäällä */}
+              <mesh position={[puoli * 0.5, k.korkeus - 0.3, 0]}>
+                <boxGeometry args={[1, 0.12, 0.12]} />
+                <meshBasicMaterial color={k.vari} />
+              </mesh>
+            </>
+          )}
+        </group>
       ))}
     </group>
   )
