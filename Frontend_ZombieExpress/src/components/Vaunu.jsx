@@ -114,9 +114,75 @@ function IkkunaSeina({ puoli }) {
   )
 }
 
+// Umpinainen päätyseinä junan päähän: samannäköinen ovi mutta ei aukene,
+// eikä siitä pääse ulos. Käytetään junan ensimmäisen vaunun takapäässä.
+function Paatyseina({ z }) {
+  return (
+    <group position={[0, 0, z]}>
+      {/* Vasen seinäpala */}
+      <RigidBody type="fixed" colliders="cuboid">
+        <mesh position={[-1.85, 1.5, 0]}>
+          <boxGeometry args={[2.3, 3, 0.2]} />
+          <meshStandardMaterial color="#2a2320" metalness={0.3} roughness={0.7} />
+        </mesh>
+      </RigidBody>
+      {/* Oikea seinäpala */}
+      <RigidBody type="fixed" colliders="cuboid">
+        <mesh position={[1.85, 1.5, 0]}>
+          <boxGeometry args={[2.3, 3, 0.2]} />
+          <meshStandardMaterial color="#2a2320" metalness={0.3} roughness={0.7} />
+        </mesh>
+      </RigidBody>
+      {/* Yläpala oviaukon päällä */}
+      <RigidBody type="fixed" colliders="cuboid">
+        <mesh position={[0, 2.7, 0]}>
+          <boxGeometry args={[1.4, 0.6, 0.2]} />
+          <meshStandardMaterial color="#2a2320" metalness={0.3} roughness={0.7} />
+        </mesh>
+      </RigidBody>
+      {/* Kiinteä ovilevy aukossa (ei aukene). Yksityiskohdat vaunun sisään päin (-z). */}
+      <RigidBody type="fixed" colliders="cuboid">
+        <group position={[0, 1.2, 0]}>
+          {/* Oven runko */}
+          <mesh>
+            <boxGeometry args={[1.4, 2.4, 0.1]} />
+            <meshStandardMaterial color="#3a3a45" metalness={0.6} roughness={0.4} />
+          </mesh>
+          {/* Ikkuna oven yläosassa */}
+          <mesh position={[0, 0.55, -0.02]}>
+            <boxGeometry args={[0.9, 0.9, 0.08]} />
+            <meshStandardMaterial color="#0a0a14" transparent opacity={0.5} roughness={0.1} />
+          </mesh>
+          {/* Ikkunan kehys */}
+          <mesh position={[0, 0.55, -0.04]}>
+            <boxGeometry args={[1.0, 1.0, 0.04]} />
+            <meshStandardMaterial color="#26262e" metalness={0.5} roughness={0.5} />
+          </mesh>
+          {/* Ikkunan lasi kehyksen sisällä */}
+          <mesh position={[0, 0.55, -0.05]}>
+            <boxGeometry args={[0.88, 0.88, 0.02]} />
+            <meshStandardMaterial color="#0a0e18" transparent opacity={0.45} roughness={0.1} />
+          </mesh>
+          {/* Kahva */}
+          <mesh position={[0.5, -0.1, -0.08]}>
+            <cylinderGeometry args={[0.03, 0.03, 0.5, 8]} />
+            <meshStandardMaterial color="#6a6a72" metalness={0.8} roughness={0.3} />
+          </mesh>
+          {/* Alareunan lista */}
+          <mesh position={[0, -1.05, -0.03]}>
+            <boxGeometry args={[1.4, 0.15, 0.06]} />
+            <meshStandardMaterial color="#26262e" metalness={0.5} roughness={0.5} />
+          </mesh>
+        </group>
+      </RigidBody>
+    </group>
+  )
+}
+
 // Yksi junavaunu: lattia, katto, valot, ikkunaseinät, penkit ja päätyovet.
 // z siirtää vaunun oikeaan kohtaan junassa.
-export function Vaunu({ z }) {
+// eka = ensimmäinen vaunu (takapää umpiseinä, ettei pääse ulos junasta).
+export function Vaunu({ z, eka = false }) {
   // 20 penkkiriviä tasavälein, jättäen tilaa ovien eteen.
   const penkkiRivit = []
   for (let i = 0; i < 20; i++) {
@@ -210,11 +276,16 @@ export function Vaunu({ z }) {
         </group>
       ))}
 
-      {/* Etuovi ja päätyseinä (kohti veturia). */}
+      {/* Etuovi (kohti veturia). */}
       <Ovi z={-PITUUS / 2} worldZ={z - PITUUS / 2} />
 
-      {/* Takaovi ja päätyseinä (mistä tultiin). */}
-      <Ovi z={PITUUS / 2} worldZ={z + PITUUS / 2} />
+      {/* Takaovi (mistä tultiin). Ensimmäisen vaunun takapää on umpiseinä,
+          ettei pääse ulos junasta. Muuten normaali ovi. */}
+      {eka ? (
+        <Paatyseina z={PITUUS / 2} />
+      ) : (
+        <Ovi z={PITUUS / 2} worldZ={z + PITUUS / 2} />
+      )}
     </group>
   )
 }
