@@ -45,11 +45,12 @@ function IkkunaSeina({ puoli }) {
         </RigidBody>
       ))}
 
-      {/* Ikkunalasit aukkoihin. */}
+      {/* Ikkunalasit aukkoihin. Täyttävät aukon palkista palkkiin (leveys 3.0)
+          ja ala- ja yläreunan väliin (korkeus 1.3). */}
       {ikkunat.map((zi) => (
         <RigidBody key={zi} type="fixed" colliders="cuboid">
-          <mesh position={[x, 1.6, zi]}>
-            <boxGeometry args={[0.1, 1.6, 2.2]} />
+          <mesh position={[x, 1.55, zi]}>
+            <boxGeometry args={[0.1, 1.3, 3.0]} />
             <meshStandardMaterial
               color="#0a0a14"
               transparent
@@ -59,6 +60,29 @@ function IkkunaSeina({ puoli }) {
             />
           </mesh>
         </RigidBody>
+      ))}
+
+      {/* Ikkunakehykset: listakehys jokaisen ikkuna-aukon ympärillä, käytävän puolella. */}
+      {ikkunat.map((zi) => (
+        <group key={`kehys-${zi}`}>
+          {/* Alareuna */}
+          <mesh position={[x - puoli * 0.06, 0.9, zi]}>
+            <boxGeometry args={[0.1, 0.08, 3.0]} />
+            <meshStandardMaterial color="#4a4038" roughness={0.6} metalness={0.3} />
+          </mesh>
+          {/* Yläreuna */}
+          <mesh position={[x - puoli * 0.06, 2.2, zi]}>
+            <boxGeometry args={[0.1, 0.08, 3.0]} />
+            <meshStandardMaterial color="#4a4038" roughness={0.6} metalness={0.3} />
+          </mesh>
+          {/* Pystyreunat aukon molemmin puolin */}
+          {[-1.5, 1.5].map((rz) => (
+            <mesh key={rz} position={[x - puoli * 0.06, 1.55, zi + rz]}>
+              <boxGeometry args={[0.1, 1.3, 0.1]} />
+              <meshStandardMaterial color="#4a4038" roughness={0.6} metalness={0.3} />
+            </mesh>
+          ))}
+        </group>
       ))}
 
       {/* Matkatavarateline ikkunoiden yläpuolella, suora vaakahylly. */}
