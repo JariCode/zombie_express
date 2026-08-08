@@ -123,6 +123,27 @@ export function Vaunu({ z }) {
       <pointLight position={[0, 2.7, 6]} intensity={20} distance={18} color="#ffd8a8" />
       <pointLight position={[0, 2.7, 16]} intensity={20} distance={18} color="#ffd8a8" />
 
+      {/* Näkyvät kattovalaisimet valonlähteiden kohdalla, hehkuvat lämpimästi. */}
+      {[-14, -4, 6, 16].map((lz) => (
+        <group key={`valaisin-${lz}`} position={[0, 2.85, lz]}>
+          {/* Valaisimen kupu, pitkänomainen */}
+          <mesh>
+            <boxGeometry args={[1.2, 0.12, 0.5]} />
+            <meshStandardMaterial
+              color="#ffe8c0"
+              emissive="#ffd8a0"
+              emissiveIntensity={1.5}
+              roughness={0.3}
+            />
+          </mesh>
+          {/* Metallikehys kuvun ympärillä */}
+          <mesh position={[0, 0.02, 0]}>
+            <boxGeometry args={[1.3, 0.08, 0.6]} />
+            <meshStandardMaterial color="#2a2a30" roughness={0.4} metalness={0.6} />
+          </mesh>
+        </group>
+      ))}
+
       {/* Ikkunaseinät molemmin puolin */}
       <IkkunaSeina puoli={-1} />
       <IkkunaSeina puoli={1} />
