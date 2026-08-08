@@ -60,7 +60,8 @@ function IkkunaSeina({ puoli }) {
           </mesh>
         </RigidBody>
       ))}
-     {/* Matkatavarateline ikkunoiden yläpuolella, suora vaakahylly. */}
+
+      {/* Matkatavarateline ikkunoiden yläpuolella, suora vaakahylly. */}
       {/* Hyllytaso, työntyy seinästä käytävälle päin */}
       <mesh position={[x - puoli * 0.45, 2.3, 0]}>
         <boxGeometry args={[0.7, 0.05, PITUUS - 2]} />
@@ -71,17 +72,16 @@ function IkkunaSeina({ puoli }) {
         <cylinderGeometry args={[0.03, 0.03, PITUUS - 2, 8]} />
         <meshStandardMaterial color="#3a3a40" roughness={0.4} metalness={0.6} />
       </mesh>
-      {/* Kannatinraudat seinästä hyllyyn, pystysuorat kolmiot */}
+      {/* Kannatinraudat seinästä hyllyyn */}
       {palkit.map((zi) => (
-        <mesh key={`kannatin-${zi}`} position={[x - puoli * 0.4, 2.15, zi]}>
+        <mesh key={`kannatin-${zi}`} position={[x - puoli * 0.4, 2.25, zi]}>
           <boxGeometry args={[0.7, 0.04, 0.04]} />
           <meshStandardMaterial color="#3a3a40" roughness={0.4} metalness={0.6} />
         </mesh>
       ))}
-      {/* Matkalaukkuja hyllyllä, suorassa */}
+      {/* Matkalaukkuja hyllyllä */}
       {[-15, -6, 3, 14].map((lz, li) => (
-        <mesh key={`laukku-${lz}`}
-          position={[x - puoli * 0.45, 2.5, lz]}>
+        <mesh key={`laukku-${lz}`} position={[x - puoli * 0.45, 2.5, lz]}>
           <boxGeometry args={[0.5, 0.32, 0.7 + (li % 2) * 0.3]} />
           <meshStandardMaterial color={li % 2 === 0 ? '#2a2018' : '#20242a'} roughness={0.8} />
         </mesh>
@@ -148,11 +148,11 @@ export function Vaunu({ z }) {
       <IkkunaSeina puoli={-1} />
       <IkkunaSeina puoli={1} />
 
-      {/* Penkit molemmin puolin käytävää. */}
+      {/* Penkit molemmin puolin käytävää, kahvat käytävän puolella. */}
       {penkkiRivit.map((pz, i) => (
         <group key={i}>
-          <Penkki x={-1.8} z={pz} kaanto={Math.PI} />
-          <Penkki x={1.8} z={pz} kaanto={Math.PI} />
+          <Penkki x={-1.8} z={pz} kaanto={Math.PI} kahvaPuoli={-1} />
+          <Penkki x={1.8} z={pz} kaanto={Math.PI} kahvaPuoli={1} />
         </group>
       ))}
 

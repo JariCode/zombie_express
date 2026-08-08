@@ -1,12 +1,14 @@
 import { RigidBody } from '@react-three/rapier'
 
-// Yksi kahden istuttava junapenkki: verhoiltu istuin, selkänoja, käsinojat ja jalat.
-// x ja z sijoittavat penkin, kaanto kääntää selkänojan oikeaan suuntaan.
-export function Penkki({ x, z, kaanto = 0 }) {
+// Yksi kahden istuttava junapenkki: verhoiltu istuin, selkänoja, käsinojat, jalat ja kädensijasanka.
+// x ja z sijoittavat penkin, kaanto kääntää penkin, kahvaPuoli kertoo kummalla puolella käytävä on
+// (penkin sisäisessä koordinaatistossa: -1 tai 1).
+export function Penkki({ x, z, kaanto = 0, kahvaPuoli = 1 }) {
   // Verhoilun ja rungon värit.
   const verhoilu = '#4a2e2e'
   const verhoiluTumma = '#3a2323'
   const runko = '#1a1412'
+  const metalli = '#8a8a92'
 
   return (
     <group position={[x, 0, z]} rotation={[0, kaanto, 0]}>
@@ -71,6 +73,36 @@ export function Penkki({ x, z, kaanto = 0 }) {
           <meshStandardMaterial color={runko} roughness={0.4} metalness={0.5} />
         </mesh>
       ))}
+
+      {/* Kädensijasanka selkänojan yläkulmassa käytävän puolella. 
+          Pystytanko nousee selkänojan sivusta, ja kaari kaartuu ylös niskatuen viereen. */}
+      <group position={[kahvaPuoli * 0.82, 1.45, -0.35]} rotation={[-0.12, 0, 0]}>
+        {/* Vaakaosa ylhäällä */}
+        <mesh position={[-kahvaPuoli * 0.1, 0.05, 0]} rotation={[0, 0, Math.PI / 2]}>
+          <cylinderGeometry args={[0.018, 0.018, 0.1, 10]} />
+          <meshStandardMaterial color={metalli} roughness={0.35} metalness={0.85} />
+        </mesh>
+        {/* Kaareva yläosa */}
+        <mesh position={[-kahvaPuoli * 0.05, 0.0, 0]} rotation={[0, kahvaPuoli > 0 ? 0 : Math.PI, 0]}>
+          <torusGeometry args={[0.05, 0.018, 8, 12, Math.PI / 2]} />
+          <meshStandardMaterial color={metalli} roughness={0.35} metalness={0.85} />
+        </mesh>
+        {/* Pystyosa */}
+        <mesh position={[0, -0.15, 0]}>
+          <cylinderGeometry args={[0.018, 0.018, 0.3, 10]} />
+          <meshStandardMaterial color={metalli} roughness={0.35} metalness={0.85} />
+        </mesh>
+        {/* Kaareva alaosa peilattuna */}
+        <mesh position={[-kahvaPuoli * 0.05, -0.3, 0]} rotation={[0, kahvaPuoli > 0 ? 0 : Math.PI, -Math.PI / 2]}>
+          <torusGeometry args={[0.05, 0.018, 8, 12, Math.PI / 2]} />
+          <meshStandardMaterial color={metalli} roughness={0.35} metalness={0.85} />
+        </mesh>
+        {/* Vaakaosa alhaolla */}
+        <mesh position={[-kahvaPuoli * 0.1, -0.35, 0]} rotation={[0, 0, Math.PI / 2]}>
+          <cylinderGeometry args={[0.018, 0.018, 0.1, 10]} />
+          <meshStandardMaterial color={metalli} roughness={0.35} metalness={0.85} />
+        </mesh>
+      </group>
     </group>
   )
 }
