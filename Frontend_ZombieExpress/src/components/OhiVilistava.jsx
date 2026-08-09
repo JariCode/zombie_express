@@ -6,17 +6,17 @@ import { useRef, useMemo } from 'react'
 // puoli = -1 vasen, +1 oikea. nopeus = liikkeen vauhti.
 export function OhiVilistava({ puoli = -1, nopeus = 20 }) {
   // Kuinka pitkälle maisema ulottuu junan suuntaisesti.
-  const alku = -100
+  const alku = -160
   const loppu = 30
   const pituus = loppu - alku
 
   // Luodaan kohteet kerran: puita ja pylväitä satunnaisilla mitoilla.
   const kohteet = useMemo(() => {
     const lista = []
-    const maara = 40
+    const maara = 60
     for (let i = 0; i < maara; i++) {
       const puu = Math.random() > 0.35
-      const etaisyys = 5 + Math.random() * 14
+      const etaisyys = 8 + Math.random() * 14
       lista.push({
         z: alku + Math.random() * pituus,
         etaisyys,

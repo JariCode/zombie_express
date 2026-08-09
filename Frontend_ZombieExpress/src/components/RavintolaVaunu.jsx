@@ -1,4 +1,4 @@
-import { RigidBody } from '@react-three/rapier'
+import { RigidBody, CuboidCollider } from '@react-three/rapier'
 import { Ovi } from './Ovi'
 import { Vessa } from './Vessa'
 
@@ -231,27 +231,30 @@ export function RavintolaVaunu({ z }) {
 
       {/* ===== BAARITISKI (oikea reuna, seinän vieressä, käytävä vapaa) ===== */}
 
-      {/* Tiskin runko */}
-      <RigidBody type="fixed" colliders="cuboid" collisionGroups={YMPARISTO}>
-        <mesh position={[2.0, 0.55, -14]} castShadow>
-          <boxGeometry args={[1.7, 1.1, 6]} />
+     {/* Tiskin runko: kapea ja irti seinästä, seinän puolelle jää
+          henkilökunnan työskentelytila. Lyhennetty niin että päädyistä
+          pääsee kiertämään taakse. Collideri täsmälleen rungon kohdalla. */}
+      <RigidBody type="fixed" colliders={false} collisionGroups={YMPARISTO}>
+        <mesh position={[1.7, 0.55, -14]} castShadow>
+          <boxGeometry args={[0.9, 1.1, 3.6]} />
           <meshStandardMaterial color="#3a2e26" roughness={0.6} metalness={0.2} />
         </mesh>
+        <CuboidCollider args={[0.45, 0.55, 1.8]} position={[1.7, 0.55, -14]} />
       </RigidBody>
       {/* Tiskin kansilevy, vaaleampi */}
-      <mesh position={[2.0, 1.12, -14]}>
-        <boxGeometry args={[1.8, 0.08, 6.1]} />
+      <mesh position={[1.7, 1.12, -14]}>
+        <boxGeometry args={[1.0, 0.08, 3.7]} />
         <meshStandardMaterial color="#5a4a3a" roughness={0.4} metalness={0.3} />
       </mesh>
       {/* Tiskin etureunan lista (käytävän puoli) */}
-      <mesh position={[1.16, 0.9, -14]}>
-        <boxGeometry args={[0.06, 0.5, 6]} />
+      <mesh position={[1.26, 0.9, -14]}>
+        <boxGeometry args={[0.06, 0.5, 3.6]} />
         <meshStandardMaterial color="#6a5a48" roughness={0.4} metalness={0.4} />
       </mesh>
 
       {/* Baarijakkarat tiskin edessä (käytävän puolella) */}
-      {[-16.5, -15, -13.5, -12].map((jz) => (
-        <group key={`jakkara-${jz}`} position={[0.8, 0, jz]}>
+      {[-15.4, -14.4, -13.4, -12.6].map((jz) => (
+        <group key={`jakkara-${jz}`} position={[0.95, 0, jz]}>
           <mesh position={[0, 0.7, 0]} castShadow>
             <cylinderGeometry args={[0.22, 0.22, 0.1, 16]} />
             <meshStandardMaterial color="#4a2e2e" roughness={0.8} />
@@ -268,21 +271,21 @@ export function RavintolaVaunu({ z }) {
       ))}
 
       {/* Takahylly baaritiskin takana (oikea seinä), pulloille. */}
-      <mesh position={[2.85, 1.4, -14]}>
-        <boxGeometry args={[0.3, 1.6, 6]} />
+      <mesh position={[2.92, 1.4, -14]}>
+        <boxGeometry args={[0.15, 1.6, 6]} />
         <meshStandardMaterial color="#2a2018" roughness={0.7} />
       </mesh>
       {/* Hyllytasot */}
       {[1.0, 1.5, 2.0].map((hy) => (
-        <mesh key={hy} position={[2.7, hy, -14]}>
-          <boxGeometry args={[0.35, 0.04, 5.8]} />
+        <mesh key={hy} position={[2.82, hy, -14]}>
+          <boxGeometry args={[0.25, 0.04, 5.8]} />
           <meshStandardMaterial color="#3a2e26" roughness={0.6} />
         </mesh>
       ))}
       {/* Pulloja hyllyillä */}
       {[1.12, 1.62, 2.12].map((hy, hi) =>
         [-16, -14.7, -13.4, -12.1].map((pz, pi) => (
-          <mesh key={`pullo-${hi}-${pi}`} position={[2.7, hy, pz]}>
+          <mesh key={`pullo-${hi}-${pi}`} position={[2.82, hy, pz]}>
             <cylinderGeometry args={[0.05, 0.05, 0.22, 8]} />
             <meshStandardMaterial
               color={['#3a5a3a', '#5a3a2a', '#2a3a5a', '#5a5a2a'][pi]}
@@ -295,27 +298,29 @@ export function RavintolaVaunu({ z }) {
 
       {/* ===== KEITTIÖ (vasen reuna, seinän vieressä, käytävä vapaa) ===== */}
 
-      {/* Työtaso */}
-      <RigidBody type="fixed" colliders="cuboid" collisionGroups={YMPARISTO}>
-        <mesh position={[-2.0, 0.5, -14]}>
-          <boxGeometry args={[1.7, 1.0, 6]} />
+      {/* Työtaso: kapea ja irti seinästä, seinän puolelle jää työskentelytila.
+          Collideri täsmälleen tason kohdalla. */}
+      <RigidBody type="fixed" colliders={false} collisionGroups={YMPARISTO}>
+        <mesh position={[-1.7, 0.5, -14]}>
+          <boxGeometry args={[0.9, 1.0, 3.6]} />
           <meshStandardMaterial color="#3a3a40" roughness={0.4} metalness={0.5} />
         </mesh>
+        <CuboidCollider args={[0.45, 0.5, 1.8]} position={[-1.7, 0.5, -14]} />
       </RigidBody>
       {/* Metallinen työtason kansi */}
-      <mesh position={[-2.0, 1.02, -14]}>
-        <boxGeometry args={[1.8, 0.06, 6.1]} />
+      <mesh position={[-1.7, 1.02, -14]}>
+        <boxGeometry args={[1.0, 0.06, 3.7]} />
         <meshStandardMaterial color="#8a8a92" roughness={0.3} metalness={0.8} />
       </mesh>
       {/* Liesi (tummat levyt työtasolla) */}
-      {[-15.5, -14.3].map((lz) => (
-        <mesh key={`liesi-${lz}`} position={[-2.0, 1.06, lz]}>
+      {[-15.4, -14.4].map((lz) => (
+        <mesh key={`liesi-${lz}`} position={[-1.7, 1.06, lz]}>
           <boxGeometry args={[0.6, 0.03, 0.6]} />
           <meshStandardMaterial color="#15161a" roughness={0.5} metalness={0.6} />
         </mesh>
       ))}
       {/* Pesuallas (upotus työtasossa) */}
-      <mesh position={[-2.0, 1.04, -12.5]}>
+      <mesh position={[-1.7, 1.04, -12.8]}>
         <boxGeometry args={[0.7, 0.06, 0.5]} />
         <meshStandardMaterial color="#6a6a72" roughness={0.3} metalness={0.7} />
       </mesh>
