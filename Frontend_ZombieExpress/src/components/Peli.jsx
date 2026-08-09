@@ -48,23 +48,6 @@ export function Peli({ otaVahinkoa, peliOhi }) {
         {/* Yleisvalo joka valaisee kaiken tasaisesti. */}
         <ambientLight intensity={0.5} />
 
-        {/* Yksi varjoja heittävä valo ylhäältä. Pistevalot hoitavat muun valaistuksen. */}
-        <directionalLight
-          position={[2, 8, 2]}
-          intensity={0.4}
-          color="#ffe8d0"
-          castShadow
-          shadow-mapSize-width={2048}
-          shadow-mapSize-height={2048}
-          shadow-camera-near={0.5}
-          shadow-camera-far={60}
-          shadow-camera-left={-25}
-          shadow-camera-right={25}
-          shadow-camera-top={25}
-          shadow-camera-bottom={-25}
-          shadow-bias={-0.0004}
-        />
-
         {/* Ohi vilistävä öinen maisema molemmin puolin junaa. */}
         <OhiVilistava puoli={-1} nopeus={22} />
         <OhiVilistava puoli={1} nopeus={22} />

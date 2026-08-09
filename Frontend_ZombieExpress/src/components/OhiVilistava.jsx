@@ -53,12 +53,6 @@ export function OhiVilistava({ puoli = -1, nopeus = 20 }) {
         <meshBasicMaterial color="#070b09" />
       </mesh>
 
-      {/* Kaukainen sumuseinä horisontissa, häivyttää maiseman reunan. */}
-      <mesh position={[puoli * 20, 3, -50]}>
-        <planeGeometry args={[60, 20]} />
-        <meshBasicMaterial color="#0a0e14" transparent opacity={0.6} />
-      </mesh>
-
       {kohteet.map((k, i) => (
         <group
           key={i}

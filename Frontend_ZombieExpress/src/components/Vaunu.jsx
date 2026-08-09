@@ -2,6 +2,7 @@ import { RigidBody } from '@react-three/rapier'
 import { Penkki } from './Penkki'
 import { Ovi } from './Ovi'
 import { Vessa } from './Vessa'
+import { VaunuValo } from './VaunuValo'
 
 // Vaunun pituus z-akselilla. Vaunu ulottuu -PITUUS/2 .. +PITUUS/2.
 const PITUUS = 44
@@ -372,6 +373,9 @@ export function Vaunu({ z, eka = false }) {
         </mesh>
       </RigidBody>
 
+      {/* Tämän vaunun oma varjoja heittävä valo. */}
+      <VaunuValo />
+
       {/* Kattolamput vaunun sisällä, tasavälein pituudella. */}
       <pointLight
         position={[0, 2.7, -14]}
@@ -468,7 +472,7 @@ export function Vaunu({ z, eka = false }) {
           Ensimmäisen vaunun takapää on umpiseinä.
           Muissa vaunuissa takaovi aukeaa -z-suuntaan eli
           kyseisen vaunun sisälle. */}
-      {eka ? (
+      {/* {eka ? (
         <Paatyseina z={PITUUS / 2} />
       ) : (
         <Ovi
@@ -476,7 +480,7 @@ export function Vaunu({ z, eka = false }) {
           worldZ={z + PITUUS / 2}
           avautumissuunta={1}
         />
-      )}
+      )} */}
     </group>
   )
 }

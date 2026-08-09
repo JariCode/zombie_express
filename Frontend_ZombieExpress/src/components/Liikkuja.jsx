@@ -59,6 +59,9 @@ export function Liikkuja() {
       z: paikka.z + sallittu.z,
     })
 
+    // Huom. Tämä tulostaa koordinaatit jokaisella framella, joten konsoli saattaa täyttyä nopeasti.
+    console.log(`Pelaajan sijainti -> X: ${paikka.x.toFixed(2)}, Y: ${paikka.y.toFixed(2)}`)
+
     // Kamera seuraa kapselia, silmien korkeudella.
     camera.position.set(paikka.x, paikka.y + 0.8, paikka.z)
 

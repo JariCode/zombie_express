@@ -1,6 +1,7 @@
 import { RigidBody, CuboidCollider } from '@react-three/rapier'
 import { Ovi } from './Ovi'
 import { Vessa } from './Vessa'
+import { VaunuValo } from './VaunuValo'
 
 // Ravintolavaunun pituus z-akselilla. Sama kuin matkustajavaunulla.
 const PITUUS = 44
@@ -199,6 +200,9 @@ export function RavintolaVaunu({ z }) {
           <meshStandardMaterial color="#1a1512" />
         </mesh>
       </RigidBody>
+
+      {/* Tämän vaunun oma varjoja heittävä valo. */}
+      <VaunuValo />
 
       {/* Kattolamput */}
       <pointLight position={[0, 2.7, -14]} intensity={20} distance={18} color="#ffd8a8" />
