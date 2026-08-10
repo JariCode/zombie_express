@@ -7,7 +7,7 @@ const ALKU_HP = 3
 export function useZombit() {
   const [zombit, setZombit] = useState([
     { id: 1, aloitusZ: -3, hp: ALKU_HP, maxHp: ALKU_HP, malli: '/models/zombie_moss.glb', scale: 0.8, kuoleva: false },
-    { id: 2, aloitusZ: -7, hp: ALKU_HP, maxHp: ALKU_HP, malli: '/models/zombie_cop.glb', scale: 0.8, kuoleva: false },
+    { id: 2, aloitusZ: -7, hp: ALKU_HP, maxHp: ALKU_HP, malli: '/models/zombie_cop.glb', scale: 0.7, kuoleva: false },
     { id: 3, aloitusZ: -11, hp: ALKU_HP, maxHp: ALKU_HP, malli: '/models/zombie_female.glb', scale: 0.8, kuoleva: false },
   ])
 
