@@ -65,6 +65,58 @@ export function Intro({ onValmis }) {
     return () => window.removeEventListener('keydown', ohita)
   }, [onValmis])
 
+  //Junaääni toistuu koko intro-kohtauksen ajan. Käynnistetään kerran.
+  useEffect(() => {
+    const junaAani = new Audio('/audio/sfx/train.mp3')
+    junaAani.loop = true
+    junaAani.volume = 0.4
+    junaAani.play().catch(() => {})
+    return () => {
+      junaAani.pause()
+      junaAani.currentTime = 0
+    }
+  }, [])
+
+  //Yskäisyääni toistuu kun tarinan mies yskii. Toistuu loopilla neljä kertaa
+  useEffect(() => {
+    if (nykyinen === 4 || nykyinen === 5) {
+      const yskaAani = new Audio('/audio/sfx/coughing.mp3')
+      yskaAani.loop = true
+      yskaAani.volume = 0.4
+      yskaAani.play().catch(() => {})
+      return () => {
+        yskaAani.pause()
+        yskaAani.currentTime = 0
+      }
+    }
+  }, [nykyinen])
+
+  //Lasin hajoamisen ääni toistuu kerran kun tarinan mies on vessassa ja joku rikkoo lasin. Toistuu kerran.
+  useEffect(() => {
+    if (nykyinen === 7) {
+      const lasiAani = new Audio('/audio/sfx/glass.mp3')
+      lasiAani.volume = 0.4
+      lasiAani.play().catch(() => {})
+      return () => {
+        lasiAani.pause()
+        lasiAani.currentTime = 0
+      }
+    }
+  }, [nykyinen])
+
+  //Murinaa ja ääniä kun tarinan mies on vessassa. Toistuu kerran.
+  useEffect(() => {
+    if (nykyinen === 7 || nykyinen === 8 || nykyinen === 9) {
+      const murinaAani = new Audio('/audio/sfx/murinaa.mp3')
+      murinaAani.volume = 0.4
+      murinaAani.play().catch(() => {})
+      return () => {
+        murinaAani.pause()
+        murinaAani.currentTime = 0
+      }
+    }
+  }, [nykyinen])
+
   if (nykyinen >= KOHTAUKSET.length) return null
 
   const kohtaus = KOHTAUKSET[nykyinen]
