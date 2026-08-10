@@ -23,6 +23,9 @@ export function Peli({ otaVahinkoa, peliOhi }) {
   const { roiskeet, lisaaRoiske } = useRoiskeet()
   // Kaikki zombie-mallit id:n mukaan, jotta ampuja löytää ne.
   const zombieMeshit = useRef({})
+  // Viittaus hiirilukkoon (PointerLockControls), jotta se voidaan lukita
+  // automaattisesti kun peli alkaa.
+  const lukkoRef = useRef()
   // Pelaajan saamien vahinkojen määrä.
   const [vahinkoFlash, setVahinkoFlash] = useState(0)
   // Zombie ilmoittaa mallinsa tähän (tai null kun poistuu).
@@ -38,6 +41,30 @@ export function Peli({ otaVahinkoa, peliOhi }) {
     otaVahinkoa(maara)
     setVahinkoFlash((arvo) => arvo + 1)
   }, [otaVahinkoa])
+
+  // Lukitaan hiiri automaattisesti kun peli alkaa. Jos selain vaatii
+  // käyttäjän eleen, ensimmäinen klikkaus tai näppäin ruudulla lukitsee.
+  useEffect(() => {
+    const lukitse = () => {
+      if (lukkoRef.current) {
+        try { lukkoRef.current.lock() } catch (e) {}
+      }
+    }
+    // Yritetään heti.
+    lukitse()
+    // Varmistus: ensimmäinen ele lukitsee, sitten kuuntelijat poistetaan.
+    const kertaLukitus = () => {
+      lukitse()
+      window.removeEventListener('click', kertaLukitus)
+      window.removeEventListener('keydown', kertaLukitus)
+    }
+    window.addEventListener('click', kertaLukitus)
+    window.addEventListener('keydown', kertaLukitus)
+    return () => {
+      window.removeEventListener('click', kertaLukitus)
+      window.removeEventListener('keydown', kertaLukitus)
+    }
+  }, [])
 
   // Junan taustaääni looppaa koko pelin ajan. Käynnistetään kerran.
   useEffect(() => {
@@ -126,7 +153,7 @@ export function Peli({ otaVahinkoa, peliOhi }) {
         <Pistooli />
 
         {/* Lukitsee hiiren ja kääntää katsetta. */}
-        <PointerLockControls />
+        <PointerLockControls ref={lukkoRef} />
       </Canvas>
 
       {/* Pelaajan saamasta zombien vahingosta tuleva veriefekti. */}
