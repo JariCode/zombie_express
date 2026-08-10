@@ -17,7 +17,7 @@ function IkkunaSeina({ puoli }) {
 
   // Ikkunat tasavälein vaunun pituudella.
   const ikkunat = []
-  for (let zi = -19; zi <= 19; zi += 3.8) ikkunat.push(zi)
+  for (let zi = -15.2; zi <= 15.2; zi += 3.8) ikkunat.push(zi)
 
   // Pystypalkit ikkunoiden väleissä.
   const palkit = []
@@ -38,6 +38,23 @@ function IkkunaSeina({ puoli }) {
           <meshStandardMaterial color="#3a2f28" />
         </mesh>
       </RigidBody>
+
+      {/* Umpiseinä ensimmäisen ja viimeisen ikkunan ohi jäävien aukkojen
+          kohdalle (z=±21), jottei seinään jää reikää. */}
+      {[-21, 21].map((zi) => (
+        <mesh key={`umpi-${zi}`} position={[x, 1.55, zi]}>
+          <boxGeometry args={[0.2, 1.3, 3.0]} />
+          <meshStandardMaterial color="#3a2f28" />
+        </mesh>
+      ))}
+
+      {/* Umpiseinä ikkunan ja päädyn väliin jääneeseen rakoon (väliseinän kohta). */}
+      {[-18, 18].map((zi) => (
+        <mesh key={`rako-${zi}`} position={[x, 1.55, zi]}>
+          <boxGeometry args={[0.2, 1.3, 2.0]} />
+          <meshStandardMaterial color="#3a2f28" />
+        </mesh>
+      ))}
 
       {/* Pystypalkit ikkunoiden väleissä. */}
       {palkit.map((zi) => (
@@ -347,8 +364,73 @@ export function RavintolaVaunu({ z }) {
         </group>
       ))}
 
-      {/* Vessa vaunun takaosassa, samassa kohdassa kuin muissa vaunuissa. */}
-      <Vessa />
+      {/* Vessa oikealla puolella, kiinni +z-pään eteisen väliseinässä. */}
+      <Vessa position={[1.8, 0, 17]} />
+
+      {/* Välikkö (eteinen) molemmissa päädyissä: väliseinä oviaukolla erottaa
+          välikön muusta tilasta, ulko-ovet molemmilla sivuseinillä. */}
+      {[-1, 1].map((suunta) => {
+        const valikkoZ = suunta * 19.5
+        const valiseinaZ = valikkoZ - suunta * 1.4
+        return (
+          <group key={suunta}>
+            <RigidBody type="fixed" colliders={false} collisionGroups={0x0001000f}>
+              <mesh position={[-1.85, 1.5, valiseinaZ]}>
+                <boxGeometry args={[2.3, 3, 0.2]} />
+                <meshStandardMaterial color="#2a2320" metalness={0.3} roughness={0.7} />
+              </mesh>
+              <CuboidCollider args={[1.15, 1.5, 0.1]} position={[-1.85, 1.5, valiseinaZ]} />
+            </RigidBody>
+            <RigidBody type="fixed" colliders={false} collisionGroups={0x0001000f}>
+              <mesh position={[1.85, 1.5, valiseinaZ]}>
+                <boxGeometry args={[2.3, 3, 0.2]} />
+                <meshStandardMaterial color="#2a2320" metalness={0.3} roughness={0.7} />
+              </mesh>
+              <CuboidCollider args={[1.15, 1.5, 0.1]} position={[1.85, 1.5, valiseinaZ]} />
+            </RigidBody>
+            <RigidBody type="fixed" colliders={false} collisionGroups={0x0001000f}>
+              <mesh position={[0, 2.7, valiseinaZ]}>
+                <boxGeometry args={[1.4, 0.6, 0.2]} />
+                <meshStandardMaterial color="#2a2320" metalness={0.3} roughness={0.7} />
+              </mesh>
+              <CuboidCollider args={[0.7, 0.3, 0.1]} position={[0, 2.7, valiseinaZ]} />
+            </RigidBody>
+            <mesh position={[-0.72, 1.2, valiseinaZ]}>
+              <boxGeometry args={[0.08, 2.4, 0.24]} />
+              <meshStandardMaterial color="#6a6a72" metalness={0.5} roughness={0.5} />
+            </mesh>
+            <mesh position={[0.72, 1.2, valiseinaZ]}>
+              <boxGeometry args={[0.08, 2.4, 0.24]} />
+              <meshStandardMaterial color="#6a6a72" metalness={0.5} roughness={0.5} />
+            </mesh>
+
+            {[-1, 1].map((puoli) => (
+              <group key={puoli} position={[puoli * 2.92, 0, valikkoZ]}>
+                <mesh position={[0, 1.15, 0]}>
+                  <boxGeometry args={[0.06, 2.4, 1.5]} />
+                  <meshStandardMaterial color="#4a4038" metalness={0.4} roughness={0.6} />
+                </mesh>
+                <mesh position={[puoli * -0.04, 1.15, 0]}>
+                  <boxGeometry args={[0.06, 2.2, 1.3]} />
+                  <meshStandardMaterial color="#5a5560" metalness={0.5} roughness={0.5} />
+                </mesh>
+                <mesh position={[puoli * -0.08, 1.55, 0]}>
+                  <boxGeometry args={[0.04, 1.0, 1.0]} />
+                  <meshStandardMaterial color="#0a0e18" transparent opacity={0.45} roughness={0.1} metalness={0} />
+                </mesh>
+                <mesh position={[puoli * -0.06, 1.55, 0]}>
+                  <boxGeometry args={[0.03, 1.1, 1.1]} />
+                  <meshStandardMaterial color="#26262e" metalness={0.5} roughness={0.5} />
+                </mesh>
+                <mesh position={[puoli * -0.1, 0.9, puoli * 0.4]}>
+                  <boxGeometry args={[0.04, 0.5, 0.06]} />
+                  <meshStandardMaterial color="#8a8a92" metalness={0.8} roughness={0.3} />
+                </mesh>
+              </group>
+            ))}
+          </group>
+        )
+      })}
 
       {/* ===== OVET PÄÄDYISSÄ ===== */}
 
