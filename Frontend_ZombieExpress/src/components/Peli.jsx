@@ -1,7 +1,7 @@
 import { Canvas } from '@react-three/fiber'
 import { PointerLockControls } from '@react-three/drei'
 import { Physics } from '@react-three/rapier'
-import { useRef, useCallback, useState } from 'react'
+import { useRef, useCallback, useState, useEffect } from 'react'
 import { Juna } from './Juna'
 import { Liikkuja } from './Liikkuja'
 import { Zombie } from './Zombie'
@@ -38,6 +38,18 @@ export function Peli({ otaVahinkoa, peliOhi }) {
     otaVahinkoa(maara)
     setVahinkoFlash((arvo) => arvo + 1)
   }, [otaVahinkoa])
+
+  // Junan taustaääni looppaa koko pelin ajan. Käynnistetään kerran.
+  useEffect(() => {
+    const junaAani = new Audio('/audio/sfx/train.mp3')
+    junaAani.loop = true
+    junaAani.volume = 0.4
+    junaAani.play().catch(() => {})
+    return () => {
+      junaAani.pause()
+      junaAani.currentTime = 0
+    }
+  }, [])
 
   return (
     <>

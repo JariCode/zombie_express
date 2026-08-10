@@ -13,9 +13,19 @@ export function Ampuja({ zombieMeshit, onOsuma, onRoiske }) {
   const signaali = useAmpumisSignaali()
 
   useEffect(() => {
+    // Ampumisääni ladataan kerran. Kloonataan joka laukauksella, jotta
+    // nopeat peräkkäiset laukaukset soivat päällekkäin.
+    const laukausAani = new Audio('/audio/sfx/gunshot.mp3')
+    laukausAani.volume = 0.5
+
     const ammu = () => {
       // Kasvatetaan laukauslaskuria, jotta pistooli näyttää suuliekin.
       signaali.laukauksia += 1
+
+      // Soitetaan ampumisääni (klooni sallii päällekkäiset laukaukset).
+      const aani = laukausAani.cloneNode()
+      aani.volume = 0.5
+      aani.play().catch(() => {})
 
       // Ammutaan ruudun keskeltä (0,0 = keskikohta).
       raycaster.current.setFromCamera(keskipiste.current, camera)
