@@ -64,14 +64,32 @@ export function Zombie({ id, aloitusZ = -15, hp, maxHp, onRef, peliOhi, malli, s
     return () => clearTimeout(ajastin)
   }, [hp])
 
-  // Kun kuolema alkaa, jäädytetään animaatio paikalleen.
+ // Kun kuolema alkaa, jäädytetään animaatio paikalleen ja toistetaan kuolinääni.
   useEffect(() => {
     if (kuoleva) {
       Object.values(actions).forEach((a) => {
         if (a) a.paused = true
       })
+
+      const kuolinAani = new Audio('/audio/sfx/death.mp3')
+      kuolinAani.volume = 1
+      kuolinAani.play().catch(() => {})
     }
   }, [kuoleva, actions])
+
+  //Murinaa loopilla aina kun zombie on elossa.
+  useEffect(() => {
+    if (kuoleva) return
+    const murinaAani = new Audio('/audio/sfx/matalaamurinaa.mp3')
+    murinaAani.loop = true
+    murinaAani.volume = 0.4
+    murinaAani.play().catch(() => {})
+    return () => {
+      murinaAani.pause()
+      murinaAani.currentTime = 0
+    }
+  }, [kuoleva])
+
 
   useFrame((state, delta) => {
     if (!body.current || !malliRyhma.current) return
@@ -116,11 +134,17 @@ export function Zombie({ id, aloitusZ = -15, hp, maxHp, onRef, peliOhi, malli, s
     const kulma = Math.atan2(suunta.current.x, suunta.current.z)
     malliRyhma.current.rotation.y = kulma
 
-    // Jos lähellä, puree kerran sekunnissa. Muuten liikkuu kohti.
+  // Jos lähellä, puree kerran sekunnissa. Muuten liikkuu kohti.
     puremaAjastin.current -= delta
     if (etaisyys < 1.5) {
       if (puremaAjastin.current <= 0) {
         otaVahinkoa(10)
+        
+        // Soitetaan vahinkoääni tässä
+        const hurtAani = new Audio('/audio/sfx/hurt.mp3')
+        hurtAani.volume = 1
+        hurtAani.play().catch(() => {})
+
         puremaAjastin.current = 1
       }
     } else {
@@ -145,20 +169,21 @@ export function Zombie({ id, aloitusZ = -15, hp, maxHp, onRef, peliOhi, malli, s
     >
       {!kuoleva && (
         <CapsuleCollider
-          args={[0.6, 0.4]}
+          args={[0.7, 0.5]} // Kasvatettu hieman korkeutta ja sädettä, jotta estää paremmin läpimenoa
+          position={[0, 0, 0]}
           sensor={false}
           activeCollisionTypes={1 | 2 | 4 | 8}
         />
       )}
 
-      {/* Kloonattu zombie-malli. */}
-      <group ref={malliRyhma} position={[0, -1, 0]} scale={scale}>
+      {/* Kloonattu zombie-malli. Muutettu Y-koordinaattia -1 -> -0.9 tai -0.8, etteivät jalat uppoa lattiaan. */}
+      <group ref={malliRyhma} position={[0, -0.9, 0]} scale={scale}>
         <primitive object={klooni} />
       </group>
 
       {/* HP-palkki pään yläpuolella, piilotetaan kuollessa. */}
       {!kuoleva && (
-        <Html position={[0, 1.3, 0]} center distanceFactor={8}>
+        <Html position={[0, 1.4, 0]} center distanceFactor={8}>
           <div className="zombie-hp">
             <div className="zombie-hp-fill" style={{ width: `${hpProsentti}%` }} />
           </div>
