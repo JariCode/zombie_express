@@ -51,6 +51,18 @@ export function Peli({ otaVahinkoa, peliOhi }) {
     }
   }, [])
 
+  //Taustamusiiki looppaa koko pelin ajan. Käynnistetään kerran.
+  useEffect(() => {
+    const taustamusiikki = new Audio('/audio/music/background.mp3')
+    taustamusiikki.loop = true
+    taustamusiikki.volume = 0.4
+    taustamusiikki.play().catch(() => {})
+    return () => {
+      taustamusiikki.pause()
+      taustamusiikki.currentTime = 0
+    }
+  }, [])  
+
   return (
     <>
       <Canvas shadows camera={{ position: [0, 1.6, 3], fov: 75 }}>
