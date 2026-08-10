@@ -323,7 +323,7 @@ export function RavintolaVaunu({ z }) {
           Collideri täsmälleen tason kohdalla. */}
       <RigidBody type="fixed" colliders={false} collisionGroups={YMPARISTO}>
         <mesh position={[-1.7, 0.5, -14]}>
-          <boxGeometry args={[0.9, 1.0, 3.6]} />
+          <boxGeometry args={[0.9, 1.0, 3.6]} />s
           <meshStandardMaterial color="#3a3a40" roughness={0.4} metalness={0.5} />
         </mesh>
         <CuboidCollider args={[0.45, 0.5, 1.8]} position={[-1.7, 0.5, -14]} />
