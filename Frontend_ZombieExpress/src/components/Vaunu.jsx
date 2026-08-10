@@ -133,7 +133,7 @@ function IkkunaSeina({ puoli }) {
           args={[
             0.9,
             0.05,
-            puoli === 1 ? 40.4 : PITUUS - 2
+            puoli === 1 ? 33.5 : 36
           ]}
         />
         <meshStandardMaterial
@@ -156,7 +156,7 @@ function IkkunaSeina({ puoli }) {
           args={[
             0.03,
             0.03,
-            puoli === 1 ? 40.4 : PITUUS - 2,
+            puoli === 1 ? 33.5 : 36,
             8
           ]}
         />
@@ -167,8 +167,8 @@ function IkkunaSeina({ puoli }) {
         />
       </mesh>
 
-      {/* Kannatinraudat seinästä hyllyyn */}
-      {palkit.map((zi) => (
+      {/* Kannatinraudat seinästä hyllyyn (vain hyllyn alueella). */}
+      {palkit.filter((zi) => Math.abs(zi) <= 17).map((zi) => (
         <mesh
           key={`kannatin-${zi}`}
           position={[x - puoli * 0.4, 2.25, zi]}
