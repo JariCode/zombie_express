@@ -74,7 +74,7 @@ export function Liikkuja() {
       ref={body}
       type="kinematicPosition"
       colliders={false}
-      position={[0, 1, 3]}
+      position={[0, 1, 18]}
       enabledRotations={[false, false, false]}
     >
       {/* Näkymätön törmäyskapseli pelaajan keholle. */}
