@@ -33,6 +33,13 @@ export function Zombie({ id, aloitusZ = -15, hp, maxHp, onRef, peliOhi, malli, s
   const [osui, setOsui] = useState(false)
   const ekaRender = useRef(true)
 
+ // Varmistetaan, että malli piilotetaan ensimmäisen framen ajaksi ennen fysiikan asettumista
+  const [valmis, setValmis] = useState(false)
+  useEffect(() => {
+    const ajastin = setTimeout(() => setValmis(true), 5) // Muuta numeroa halutessasi (esim. 10 tai 15 millisekuntia)
+    return () => clearTimeout(ajastin)
+  }, [])
+
   // Käynnistetään ensimmäinen animaatio (kävely/idle).
   useEffect(() => {
     if (names.length > 0 && actions[names[0]]) {
@@ -64,7 +71,7 @@ export function Zombie({ id, aloitusZ = -15, hp, maxHp, onRef, peliOhi, malli, s
     return () => clearTimeout(ajastin)
   }, [hp])
 
- // Kun kuolema alkaa, jäädytetään animaatio paikalleen ja toistetaan kuolinääni.
+  // Kun kuolema alkaa, jäädytetään animaatio paikalleen ja toistetaan kuolinääni.
   useEffect(() => {
     if (kuoleva) {
       Object.values(actions).forEach((a) => {
@@ -77,7 +84,7 @@ export function Zombie({ id, aloitusZ = -15, hp, maxHp, onRef, peliOhi, malli, s
     }
   }, [kuoleva, actions])
 
-  //Murinaa loopilla aina kun zombie on elossa.
+  // Murinaa loopilla aina kun zombie on elossa.
   useEffect(() => {
     if (kuoleva) return
     const murinaAani = new Audio('/audio/sfx/matalaamurinaa.mp3')
@@ -89,7 +96,6 @@ export function Zombie({ id, aloitusZ = -15, hp, maxHp, onRef, peliOhi, malli, s
       murinaAani.currentTime = 0
     }
   }, [kuoleva])
-
 
   useFrame((state, delta) => {
     if (!body.current || !malliRyhma.current) return
@@ -134,7 +140,7 @@ export function Zombie({ id, aloitusZ = -15, hp, maxHp, onRef, peliOhi, malli, s
     const kulma = Math.atan2(suunta.current.x, suunta.current.z)
     malliRyhma.current.rotation.y = kulma
 
-  // Jos lähellä, puree kerran sekunnissa. Muuten liikkuu kohti.
+    // Jos lähellä, puree kerran sekunnissa. Muuten liikkuu kohti.
     puremaAjastin.current -= delta
     if (etaisyys < 1.5) {
       if (puremaAjastin.current <= 0) {
@@ -176,8 +182,8 @@ export function Zombie({ id, aloitusZ = -15, hp, maxHp, onRef, peliOhi, malli, s
         />
       )}
 
-      {/* Kloonattu zombie-malli. Muutettu Y-koordinaattia -1 -> -0.9 tai -0.8, etteivät jalat uppoa lattiaan. */}
-      <group ref={malliRyhma} position={[0, -0.9, 0]} scale={scale}>
+      {/* Kloonattu zombie-malli. visible={valmis} piilottaa T-asennon ja vilahtamisen ilman että osumat/kuolema rikkoutuvat. */}
+      <group ref={malliRyhma} position={[0, -0.9, 0]} scale={scale} visible={valmis}>
         <primitive object={klooni} />
       </group>
 
@@ -192,4 +198,3 @@ export function Zombie({ id, aloitusZ = -15, hp, maxHp, onRef, peliOhi, malli, s
     </RigidBody>
   )
 }
-
