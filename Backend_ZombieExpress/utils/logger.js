@@ -1,0 +1,1 @@
+//Kirjaa tapahtuman lokiin.
