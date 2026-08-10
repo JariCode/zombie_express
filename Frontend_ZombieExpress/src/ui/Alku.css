@@ -1,0 +1,109 @@
+/* Aloitusnäkymä täyttää koko ruudun, taustana kansikuva. */
+.alku {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background-image: url('/img/kansikuva.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  font-family: 'Georgia', 'Times New Roman', serif;
+}
+
+/* Tumma verho kuvan päällä, tummentaa hieman jotta teksti erottuu. */
+.alku-verho {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at center 40%,
+    rgba(0, 0, 0, 0.15) 0%,
+    rgba(0, 0, 0, 0.45) 70%,
+    rgba(0, 0, 0, 0.7) 100%
+  );
+}
+
+/* ===== OTSIKKO JA NAPPI ===== */
+.alku-sisalto {
+  position: relative;
+  z-index: 10;
+  text-align: center;
+  margin-top: 0;
+}
+
+.alku-otsikko {
+  margin: 0;
+  line-height: 0.9;
+  letter-spacing: 0.08em;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.alku-otsikko-rivi1 {
+  font-size: 5.5rem;
+  font-weight: 900;
+  color: #e8e4d8;
+  text-shadow:
+    0 0 20px rgba(200, 30, 30, 0.5),
+    2px 2px 0 #7a1010,
+    0 4px 30px rgba(0, 0, 0, 0.95);
+}
+
+.alku-otsikko-rivi2 {
+  font-size: 5.5rem;
+  font-weight: 900;
+  color: #b01818;
+  letter-spacing: 0.18em;
+  text-shadow:
+    0 0 24px rgba(200, 30, 30, 0.6),
+    2px 2px 0 #3a0808,
+    0 4px 30px rgba(0, 0, 0, 0.95);
+  animation: alku-hehku 3.5s ease-in-out infinite;
+}
+
+@keyframes alku-hehku {
+  0%, 100% { text-shadow: 0 0 24px rgba(200, 30, 30, 0.6), 2px 2px 0 #3a0808, 0 4px 30px rgba(0,0,0,0.95); }
+  50% { text-shadow: 0 0 40px rgba(230, 40, 40, 0.95), 2px 2px 0 #3a0808, 0 4px 30px rgba(0,0,0,0.95); }
+}
+
+.alku-alaotsikko {
+  margin: 1.2rem 0 2.8rem;
+  font-size: 1.15rem;
+  letter-spacing: 0.35em;
+  color: #b8b4c4;
+  text-transform: uppercase;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.9);
+}
+
+.alku-nappi {
+  padding: 1rem 3.5rem;
+  font-family: inherit;
+  font-size: 1.3rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: #e8e4d8;
+  background: linear-gradient(180deg, #7a1414 0%, #4a0c0c 100%);
+  border: 1px solid #9a2020;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow:
+    0 0 20px rgba(150, 20, 20, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.alku-nappi:hover {
+  background: linear-gradient(180deg, #9a1a1a 0%, #5a1010 100%);
+  box-shadow:
+    0 0 34px rgba(200, 30, 30, 0.7),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+}
+
+.alku-nappi:active {
+  transform: translateY(0);
+}

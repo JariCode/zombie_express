@@ -4,6 +4,7 @@ import { Peli } from './components/Peli'
 import { Hud } from './ui/Hud'
 import { GameOver } from './ui/GameOver'
 import { Intro } from './ui/Intro'
+import { Alku } from './ui/Alku'
 import './App.css'
 
 // Esiladataan 3D-mallit valmiiksi
@@ -12,8 +13,8 @@ useGLTF.preload('/models/zombie_female.glb')
 useGLTF.preload('/models/zombie_moss.glb')
 
 function App() {
-  // Pelin vaihe: 'intro' tai 'peli'.
-  const [vaihe, setVaihe] = useState('intro')
+  // Pelin vaihe: 'alku' (aloitusnäkymä), 'intro' tai 'peli'.
+  const [vaihe, setVaihe] = useState('alku')
   const [valmis, setValmis] = useState(false)
 
   // Esiladataan KAIKKI äänet ja musiikit taustalla intron aikana
@@ -65,6 +66,8 @@ function App() {
 
   return (
     <>
+      {vaihe === 'alku' && <Alku onAloita={() => setVaihe('intro')} />}
+
       {vaihe === 'intro' && (
         <Intro onValmis={() => { if (valmis) setVaihe('peli') }} />
       )}
