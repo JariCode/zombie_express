@@ -1,4 +1,4 @@
-import { RigidBody } from '@react-three/rapier'
+import { RigidBody, CuboidCollider } from '@react-three/rapier'
 import { Penkki } from './Penkki'
 import { Ovi } from './Ovi'
 import { Vessa } from './Vessa'
@@ -14,7 +14,7 @@ function IkkunaSeina({ puoli }) {
 
   // Ikkunat tasavälein vaunun pituudella.
   const ikkunat = []
-  for (let zi = -19; zi <= 19; zi += 3.8) ikkunat.push(zi)
+  for (let zi = -15.2; zi <= 15.2; zi += 3.8) ikkunat.push(zi)
 
   // Pystypalkit ikkunoiden väleissä.
   const palkit = []
@@ -299,12 +299,14 @@ function Paatyseina({ z }) {
 // z siirtää vaunun oikeaan kohtaan junassa.
 // eka = ensimmäinen vaunu (takapää umpiseinä, ettei pääse ulos).
 export function Vaunu({ z, eka = false }) {
-  // 20 penkkiriviä tasavälein, jättäen tilaa ovien eteen.
-  const penkkiRivit = []
+  // Penkkirivit tasavälein (väli 2). Molempiin päätyihin jää tilaa välikölle.
+  // Vasen puoli täydet rivit, oikealta puolelta (vessan puoli) jätetään
+  // vessan pään viimeiset rivit pois, jotta vessa mahtuu väliseinään kiinni.
+  const vasenRivit = []
+  for (let i = 0; i < 17; i++) vasenRivit.push(-15 + i * 2)
 
-  for (let i = 0; i < 20; i++) {
-    penkkiRivit.push(-19 + i * (38 / 19))
-  }
+  // Oikealta puolelta pois vessan pään 2 viimeistä (z=15 ja 17).
+  const oikeaRivit = vasenRivit.filter((pz) => pz < 15)
 
   return (
     <group position={[0, 0, z]}>
@@ -438,27 +440,18 @@ export function Vaunu({ z, eka = false }) {
       <IkkunaSeina puoli={-1} />
       <IkkunaSeina puoli={1} />
 
-      {/* Penkit molemmin puolin käytävää, kahvat käytävän puolella. */}
-      {penkkiRivit.map((pz, i) => (
-        <group key={i}>
-          <Penkki
-            x={-1.8}
-            z={pz}
-            kaanto={Math.PI}
-            kahvaPuoli={-1}
-          />
-
-          <Penkki
-            x={1.8}
-            z={pz}
-            kaanto={Math.PI}
-            kahvaPuoli={1}
-          />
-        </group>
+      {/* Vasemman puolen penkit (täydet rivit). */}
+      {vasenRivit.map((pz, i) => (
+        <Penkki key={`v${i}`} x={-1.8} z={pz} kaanto={Math.PI} kahvaPuoli={-1} />
       ))}
 
-      {/*Vessa vaunun takaosassa, käytävän puolella. */}
-      <Vessa />
+      {/* Oikean puolen penkit (vessan pään viimeiset rivit jätetty pois). */}
+      {oikeaRivit.map((pz, i) => (
+        <Penkki key={`o${i}`} x={1.8} z={pz} kaanto={Math.PI} kahvaPuoli={1} />
+      ))}
+
+      {/* Vessa oikealla puolella, kiinni +z-pään eteisen väliseinässä. */}
+      <Vessa position={[1.8, 0, 17]} />
 
       {/* Etuovi (kohti veturia).
           Ovi aukeaa +z-suuntaan eli tämän vaunun sisälle. */}
@@ -468,11 +461,8 @@ export function Vaunu({ z, eka = false }) {
         avautumissuunta={-1}
       />
 
-      {/* Takaovi.
-          Ensimmäisen vaunun takapää on umpiseinä.
-          Muissa vaunuissa takaovi aukeaa -z-suuntaan eli
-          kyseisen vaunun sisälle. */}
-      {/* {eka ? (
+      {/* Takaovi. Ensimmäisen vaunun takapää on umpiseinä, muissa takaovi. */}
+      {eka ? (
         <Paatyseina z={PITUUS / 2} />
       ) : (
         <Ovi
@@ -480,7 +470,79 @@ export function Vaunu({ z, eka = false }) {
           worldZ={z + PITUUS / 2}
           avautumissuunta={1}
         />
-      )} */}
+      )}
+
+      {/* Välikkö (eteinen) molemmissa päädyissä: väliseinä oviaukolla erottaa
+          välikön matkustamosta, ulko-ovet molemmilla sivuseinillä. */}
+      {[-1, 1].map((suunta) => {
+        const valikkoZ = suunta * 19.5
+        const valiseinaZ = valikkoZ - suunta * 1.4
+        return (
+            <group key={suunta}>
+            <RigidBody type="fixed" colliders={false} collisionGroups={0x0001000f}>
+              <mesh position={[-1.85, 1.5, valiseinaZ]}>
+                <boxGeometry args={[2.3, 3, 0.2]} />
+                <meshStandardMaterial color="#2a2320" metalness={0.3} roughness={0.7} />
+              </mesh>
+              <CuboidCollider args={[1.15, 1.5, 0.1]} position={[-1.85, 1.5, valiseinaZ]} />
+            </RigidBody>
+            <RigidBody type="fixed" colliders={false} collisionGroups={0x0001000f}>
+              <mesh position={[1.85, 1.5, valiseinaZ]}>
+                <boxGeometry args={[2.3, 3, 0.2]} />
+                <meshStandardMaterial color="#2a2320" metalness={0.3} roughness={0.7} />
+              </mesh>
+              <CuboidCollider args={[1.15, 1.5, 0.1]} position={[1.85, 1.5, valiseinaZ]} />
+            </RigidBody>
+            <RigidBody type="fixed" colliders={false} collisionGroups={0x0001000f}>
+              <mesh position={[0, 2.7, valiseinaZ]}>
+                <boxGeometry args={[1.4, 0.6, 0.2]} />
+                <meshStandardMaterial color="#2a2320" metalness={0.3} roughness={0.7} />
+              </mesh>
+              <CuboidCollider args={[0.7, 0.3, 0.1]} position={[0, 2.7, valiseinaZ]} />
+            </RigidBody>
+            <mesh position={[-0.72, 1.2, valiseinaZ]}>
+              <boxGeometry args={[0.08, 2.4, 0.24]} />
+              <meshStandardMaterial color="#6a6a72" metalness={0.5} roughness={0.5} />
+            </mesh>
+            <mesh position={[0.72, 1.2, valiseinaZ]}>
+              <boxGeometry args={[0.08, 2.4, 0.24]} />
+              <meshStandardMaterial color="#6a6a72" metalness={0.5} roughness={0.5} />
+            </mesh>
+
+            {/* Ulko-ovet molemmilla sivuseinillä. Ovi upotettu seinään,
+                lasi-ikkuna yläosassa jotta erottuu ovena. */}
+            {[-1, 1].map((puoli) => (
+              <group key={puoli} position={[puoli * 2.92, 0, valikkoZ]}>
+                {/* Oven karmi (vaaleampi kehys ympärillä) */}
+                <mesh position={[0, 1.15, 0]}>
+                  <boxGeometry args={[0.06, 2.4, 1.5]} />
+                  <meshStandardMaterial color="#4a4038" metalness={0.4} roughness={0.6} />
+                </mesh>
+                {/* Oven paneeli */}
+                <mesh position={[puoli * -0.04, 1.15, 0]}>
+                  <boxGeometry args={[0.06, 2.2, 1.3]} />
+                  <meshStandardMaterial color="#5a5560" metalness={0.5} roughness={0.5} />
+                </mesh>
+                {/* Iso lasi-ikkuna oven yläosassa */}
+                <mesh position={[puoli * -0.08, 1.55, 0]}>
+                  <boxGeometry args={[0.04, 1.0, 1.0]} />
+                  <meshStandardMaterial color="#0a0e18" transparent opacity={0.45} roughness={0.1} metalness={0} />
+                </mesh>
+                {/* Ikkunan kehys */}
+                <mesh position={[puoli * -0.06, 1.55, 0]}>
+                  <boxGeometry args={[0.03, 1.1, 1.1]} />
+                  <meshStandardMaterial color="#26262e" metalness={0.5} roughness={0.5} />
+                </mesh>
+                {/* Pystykahva */}
+                <mesh position={[puoli * -0.1, 0.9, puoli * 0.4]}>
+                  <boxGeometry args={[0.04, 0.5, 0.06]} />
+                  <meshStandardMaterial color="#8a8a92" metalness={0.8} roughness={0.3} />
+                </mesh>
+              </group>
+            ))}
+          </group>
+        )
+      })}
     </group>
   )
 }
