@@ -165,3 +165,9 @@
   letter-spacing: 2px;
   text-transform: uppercase;
 }
+/* Sumun hidas liike junan ympärillä. */
+.sumu-liike { animation: sumu-aaltoile 8s ease-in-out infinite; }
+@keyframes sumu-aaltoile {
+  0%, 100% { opacity: 0.6; transform: translateX(0); }
+  50% { opacity: 0.9; transform: translateX(12px); }
+}

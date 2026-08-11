@@ -169,41 +169,68 @@ function IntroKuvitus({ teema }) {
             <stop offset="100%" stopColor="#0e1420" />
           </linearGradient>
           <radialGradient id="ajovaloG" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#fff8e0" />
-            <stop offset="45%" stopColor="#ffe4a0" />
+            <stop offset="0%" stopColor="#fffef5" />
+            <stop offset="30%" stopColor="#fff4d0" />
+            <stop offset="60%" stopColor="#e0c080" />
+            <stop offset="100%" stopColor="transparent" />
+          </radialGradient>
+          <linearGradient id="keilaG" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="rgba(255,245,210,0.5)" />
+            <stop offset="100%" stopColor="transparent" />
+          </linearGradient>
+          <radialGradient id="sumuG" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="rgba(120,125,140,0.28)" />
             <stop offset="100%" stopColor="transparent" />
           </radialGradient>
         </defs>
+        {/* Lähes musta yötaivas. */}
         <rect width="900" height="330" fill="url(#taivasG)" />
-        <circle cx="770" cy="70" r="40" fill="url(#kuuG)" className="kuu-hehku" />
+        <circle cx="780" cy="60" r="34" fill="url(#kuuG)" className="kuu-hehku" opacity="0.55" />
         {[[120,60],[220,110],[340,50],[500,90],[620,140],[840,150],[60,140]].map(([cx,cy],i) => (
-          <circle key={i} cx={cx} cy={cy} r="1.5" fill="#cdd6ee" opacity="0.7" className="tahti"
+          <circle key={i} cx={cx} cy={cy} r="1.3" fill="#cdd6ee" opacity="0.5" className="tahti"
             style={{ animationDelay: `${i * 0.5}s` }} />
         ))}
-        <rect y="330" width="900" height="170" fill="#060a12" />
-        <polygon points="420,330 480,330 660,500 240,500" fill="#0d1219" />
-        <line x1="435" y1="330" x2="290" y2="500" stroke="#1c2432" strokeWidth="4" />
-        <line x1="465" y1="330" x2="610" y2="500" stroke="#1c2432" strokeWidth="4" />
+        <rect y="330" width="900" height="170" fill="#04070c" />
+        {/* Pensaita/puita sivuilla siluettina, hämärän tunnun luomiseksi. */}
+        <polygon points="0,300 60,180 120,300" fill="#080b11" opacity="0.8" />
+        <polygon points="780,300 850,190 900,300" fill="#080b11" opacity="0.8" />
+        {/* Kiskot. */}
+        <polygon points="420,330 480,330 660,500 240,500" fill="#0a0e14" />
+        <line x1="435" y1="330" x2="290" y2="500" stroke="#20283a" strokeWidth="4" />
+        <line x1="465" y1="330" x2="610" y2="500" stroke="#20283a" strokeWidth="4" />
         {[...Array(6)].map((_, i) => (
           <rect key={i} className="polkky"
             x={438 - i * 17} y={342 + i * 27} width={24 + i * 34} height="5"
-            fill="#141a24" style={{ animationDelay: `${i * 0.25}s` }} />
+            fill="#101620" style={{ animationDelay: `${i * 0.25}s` }} />
         ))}
         <g className="juna-lahesty">
-          <polygon points="390,150 510,150 490,210 410,210" fill="#0c111b" />
-          <rect x="360" y="185" width="180" height="170" rx="16" fill="url(#veturiG)" />
-          <rect x="368" y="178" width="164" height="18" rx="9" fill="#3a4658" />
-          <rect x="405" y="205" width="90" height="58" rx="6" fill="#0a1420" stroke="#1e2836" strokeWidth="2" />
-          <rect x="410" y="210" width="40" height="48" fill="#16202e" opacity="0.5" />
-          <rect x="395" y="285" width="110" height="50" rx="6" fill="#12161f" />
+          {/* Häikäisevät valokeilat alaspäin. */}
+          <polygon points="372,270 412,270 320,480 130,480" fill="url(#keilaG)" className="ajovalo" opacity="0.55" />
+          <polygon points="488,270 528,270 770,480 580,480" fill="url(#keilaG)" className="ajovalo" opacity="0.55" />
+          {/* Veturi lähes mustana siluettina, pyöreä kansikuvan tyyliin. */}
+          <path d="M360 210 Q360 175 400 172 L500 172 Q540 175 540 210 L540 350 L360 350 Z" fill="#070a10" />
+          <path d="M366 205 Q366 182 400 180 L500 180 Q534 182 534 205 L534 210 L366 210 Z" fill="#0e131c" />
+          {/* Tuulilasi, himmeä. */}
+          <rect x="405" y="200" width="90" height="62" rx="8" fill="#0a1018" stroke="#161e2a" strokeWidth="2" />
+          <rect x="410" y="205" width="40" height="52" fill="#121a26" opacity="0.4" />
+          {/* Etusäleikkö, tumma. */}
+          <rect x="395" y="288" width="110" height="52" rx="6" fill="#080b11" />
           {[...Array(4)].map((_, i) => (
-            <rect key={i} x={402} y={293 + i * 11} width="96" height="4" rx="2" fill="#2a3040" />
+            <rect key={i} x={402} y={296 + i * 11} width="96" height="3" rx="1.5" fill="#1a202c" />
           ))}
-          <circle cx="392" cy="270" r="30" fill="url(#ajovaloG)" className="ajovalo" />
-          <circle cx="508" cy="270" r="30" fill="url(#ajovaloG)" className="ajovalo" />
-          <circle cx="392" cy="270" r="11" fill="#fff8e0" />
-          <circle cx="508" cy="270" r="11" fill="#fff8e0" />
+          {/* Kolmas pieni ylävalo keskellä. */}
+          <circle cx="450" cy="188" r="14" fill="url(#ajovaloG)" className="ajovalo" />
+          <circle cx="450" cy="188" r="6" fill="#fff8e0" />
+          {/* Kaksi isoa häikäisevää ajovaloa. */}
+          <circle cx="392" cy="272" r="46" fill="url(#ajovaloG)" className="ajovalo" />
+          <circle cx="508" cy="272" r="46" fill="url(#ajovaloG)" className="ajovalo" />
+          <circle cx="392" cy="272" r="15" fill="#fffef5" />
+          <circle cx="508" cy="272" r="15" fill="#fffef5" />
         </g>
+        {/* Sumua junan ympärillä ja alaosassa. */}
+        <ellipse cx="450" cy="360" rx="320" ry="70" fill="url(#sumuG)" className="sumu-liike" />
+        <ellipse cx="250" cy="330" rx="160" ry="50" fill="url(#sumuG)" className="sumu-liike" opacity="0.7" />
+        <ellipse cx="650" cy="330" rx="160" ry="50" fill="url(#sumuG)" className="sumu-liike" opacity="0.7" />
       </svg>
     )
   }
