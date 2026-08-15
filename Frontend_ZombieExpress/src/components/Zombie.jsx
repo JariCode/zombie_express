@@ -1,7 +1,7 @@
 import { useFrame } from '@react-three/fiber'
 import { useRef, useEffect, useState, useMemo } from 'react'
 import { RigidBody, CapsuleCollider } from '@react-three/rapier'
-import { useGLTF, useAnimations, Html } from '@react-three/drei'
+import { useGLTF, useAnimations, Billboard } from '@react-three/drei'
 import { SkeletonUtils } from 'three-stdlib'
 import * as THREE from 'three'
 import { usePelaajanPaikka } from '../hooks/usePelaajanPaikka'
@@ -187,13 +187,24 @@ export function Zombie({ id, aloitusZ = -15, hp, maxHp, onRef, peliOhi, malli, s
         <primitive object={klooni} />
       </group>
 
-      {/* HP-palkki pään yläpuolella, piilotetaan kuollessa. */}
+      {/* HP-palkki pään yläpuolella 3D-objektina (Billboard kääntää kameraan).
+          Ei Html-elementtiä, jottei DOM-synkronointi hidasta peliä. */}
       {!kuoleva && (
-        <Html position={[0, 1.4, 0]} center distanceFactor={8}>
-          <div className="zombie-hp">
-            <div className="zombie-hp-fill" style={{ width: `${hpProsentti}%` }} />
-          </div>
-        </Html>
+        <Billboard position={[0, 1.4, 0]}>
+          {/* Tausta (tumma). */}
+          <mesh>
+            <planeGeometry args={[0.9, 0.12]} />
+            <meshBasicMaterial color="#3a0a0a" transparent opacity={0.8} depthTest={false} />
+          </mesh>
+          {/* Täyttö (punainen), skaalautuu hp:n mukaan ja siirtyy vasemmalle. */}
+          <mesh
+            position={[-(0.9 * (1 - hpProsentti / 100)) / 2, 0, 0.001]}
+            scale={[hpProsentti / 100, 1, 1]}
+          >
+            <planeGeometry args={[0.9, 0.12]} />
+            <meshBasicMaterial color="#e63030" transparent opacity={0.9} depthTest={false} />
+          </mesh>
+        </Billboard>
       )}
     </RigidBody>
   )

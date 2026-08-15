@@ -1,6 +1,9 @@
 import { RigidBody, CuboidCollider } from '@react-three/rapier'
 import { useRef, useState, useEffect } from 'react'
 import { Vector3 } from 'three'
+
+// Apuvektori world-position-laskentaan, jotta framessa ei luoda uutta oliota.
+const apuVec = new Vector3()
 import { useFrame } from '@react-three/fiber'
 import { Html } from '@react-three/drei'
 import { usePelaajanPaikka } from '../hooks/usePelaajanPaikka'
@@ -31,10 +34,10 @@ export function Vessa({ position = [1.8, 0, 20.5] }) {
 
   useFrame((state, delta) => {
     // Päivitetään vessa-ryhmän world-Z, jotta "lahella" lasketaan oikein.
+    // Käytetään moduulitason apuvektoria, ettei joka framessa luoda uutta.
     if (rootRef.current) {
-      const v = new Vector3()
-      rootRef.current.getWorldPosition(v)
-      worldZRef.current = v.z
+      rootRef.current.getWorldPosition(apuVec)
+      worldZRef.current = apuVec.z
     }
 
     const dz = Math.abs(pelaajanPaikka.z - worldZRef.current)
