@@ -42,18 +42,22 @@ function IkkunaSeina({ puoli }) {
       {/* Umpiseinä ensimmäisen ja viimeisen ikkunan ohi jäävien aukkojen
           kohdalle (z=±21), jottei seinään jää reikää. */}
       {[-21, 21].map((zi) => (
-        <mesh key={`umpi-${zi}`} position={[x, 1.55, zi]}>
-          <boxGeometry args={[0.2, 1.3, 3.0]} />
-          <meshStandardMaterial color="#3a2f28" />
-        </mesh>
+        <RigidBody key={`umpi-${zi}`} type="fixed" colliders="cuboid">
+          <mesh position={[x, 1.55, zi]}>
+            <boxGeometry args={[0.2, 1.3, 3.0]} />
+            <meshStandardMaterial color="#3a2f28" />
+          </mesh>
+        </RigidBody>
       ))}
 
       {/* Umpiseinä ikkunan ja päädyn väliin jääneeseen rakoon (väliseinän kohta). */}
       {[-18, 18].map((zi) => (
-        <mesh key={`rako-${zi}`} position={[x, 1.55, zi]}>
-          <boxGeometry args={[0.2, 1.3, 2.0]} />
-          <meshStandardMaterial color="#3a2f28" />
-        </mesh>
+        <RigidBody key={`rako-${zi}`} type="fixed" colliders="cuboid">
+          <mesh position={[x, 1.55, zi]}>
+            <boxGeometry args={[0.2, 1.3, 2.0]} />
+            <meshStandardMaterial color="#3a2f28" />
+          </mesh>
+        </RigidBody>
       ))}
 
       {/* Pystypalkit ikkunoiden väleissä. */}
