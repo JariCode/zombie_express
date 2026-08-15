@@ -12,13 +12,17 @@ const PITUUS = 44
 function IkkunaSeina({ puoli }) {
   const x = puoli * 3
 
-  // Ikkunat tasavälein vaunun pituudella.
+  // Ikkunat tasavälein vaunun pituudella. 
+  // Oikealla puolella (vessan puoli, puoli === 1) lopetetaan ikkunat aikaisemmin,
+  // jotta ensimmäinen ikkuna ei mene vessan seinän sisälle.
   const ikkunat = []
-  for (let zi = -15.2; zi <= 15.2; zi += 3.8) ikkunat.push(zi)
+  const maxIkkunaZi = puoli === 1 ? 11.4 : 15.2
+  for (let zi = -15.2; zi <= maxIkkunaZi; zi += 3.8) ikkunat.push(zi)
 
   // Pystypalkit ikkunoiden väleissä.
   const palkit = []
-  for (let zi = -20.9; zi <= 20.9; zi += 3.8) palkit.push(zi)
+  const maxPalkkiZi = puoli === 1 ? 17.1 : 20.9
+  for (let zi = -20.9; zi <= maxPalkkiZi; zi += 3.8) palkit.push(zi)
 
   return (
     <group>
@@ -37,7 +41,7 @@ function IkkunaSeina({ puoli }) {
       </RigidBody>
 
      {/* Umpiseinä ensimmäisen ja viimeisen ikkunan ohi jäävien aukkojen
-          kohdalle (z=±21), jottei seinään jää reikää. */}
+         kohdalle (z=±21), jottei seinään jää reikää. */}
       {[-21, 21].map((zi) => (
         <RigidBody key={`umpi-${zi}`} type="fixed" colliders="cuboid">
           <mesh position={[x, 1.55, zi]}>
@@ -56,6 +60,16 @@ function IkkunaSeina({ puoli }) {
           </mesh>
         </RigidBody>
       ))}
+
+      {/* Umpiseinä oikealla puolella vessan kohdalla, jottei seinään jää reikää */}
+      {puoli === 1 && (
+        <RigidBody type="fixed" colliders="cuboid">
+          <mesh position={[x, 1.55, 15.2]}>
+            <boxGeometry args={[0.2, 1.3, 3.8]} />
+            <meshStandardMaterial color="#3a2f28" />
+          </mesh>
+        </RigidBody>
+      )}
 
       {/* Pystypalkit ikkunoiden väleissä. */}
       {palkit.map((zi) => (
