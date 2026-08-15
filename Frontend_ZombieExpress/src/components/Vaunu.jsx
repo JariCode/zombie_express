@@ -23,8 +23,8 @@ function IkkunaSeina({ puoli }) {
   return (
     <group>
       {/* Alareuna koko seinän pituudelta. */}
-      <mesh position={[x, 0.6, 0]}>
-        <boxGeometry args={[0.2, 0.6, PITUUS]} />
+      <mesh position={[x, 0.3, 0]}>
+        <boxGeometry args={[0.2, 1.2, PITUUS]} />
         <meshStandardMaterial color="#3a2f28" />
       </mesh>
 
