@@ -1,4 +1,5 @@
 import { RigidBody, CuboidCollider } from '@react-three/rapier'
+import * as THREE from 'three'
 import { Ovi } from './Ovi'
 import { Vessa } from './Vessa'
 import { VaunuValo } from './VaunuValo'
@@ -8,6 +9,21 @@ const PITUUS = 44
 
 // Ympariston tormaysryhma: ryhma 0, tormaa kaikkiin.
 const YMPARISTO = 0x0001000f
+
+// Jaetut geometriat ja materiaalit ikkunaseinille, jottei niitä luoda
+// uudelleen joka seinälle. Sama kevennys kuin matkustajavaunussa.
+const seinaMat = new THREE.MeshStandardMaterial({ color: '#3a2f28' })
+const kehysMat = new THREE.MeshStandardMaterial({ color: '#4a4038', roughness: 0.6, metalness: 0.3 })
+const lasiMat = new THREE.MeshStandardMaterial({ color: '#0a0a14', transparent: true, opacity: 0.4, roughness: 0.1, metalness: 0 })
+
+const alareunaGeo = new THREE.BoxGeometry(0.2, 1.2, PITUUS)
+const ylareunaGeo = new THREE.BoxGeometry(0.2, 0.8, PITUUS)
+const umpiGeo = new THREE.BoxGeometry(0.2, 1.3, 3.0)
+const rakoGeo = new THREE.BoxGeometry(0.2, 1.3, 2.0)
+const palkkiGeo = new THREE.BoxGeometry(0.2, 3, 0.8)
+const lasiGeo = new THREE.BoxGeometry(0.1, 1.3, 3.0)
+const kehysVaakaGeo = new THREE.BoxGeometry(0.1, 0.08, 3.0)
+const kehysPystyGeo = new THREE.BoxGeometry(0.1, 1.3, 0.1)
 
 // Yksi ikkunaseinä: pystypalkkeja joiden väliin jää ikkunat.
 // Sama rakenne kuin matkustajavaunussa.
@@ -26,82 +42,49 @@ function IkkunaSeina({ puoli }) {
   return (
     <group>
       {/* Alareuna koko seinän pituudelta. */}
-       <mesh position={[x, 0.3, 0]}>
-        <boxGeometry args={[0.2, 1.2, PITUUS]} />
-        <meshStandardMaterial color="#3a2f28" />
-      </mesh>
+      <mesh geometry={alareunaGeo} material={seinaMat} position={[x, 0.3, 0]} />
 
       {/* Yläreuna koko seinän pituudelta. */}
       <RigidBody type="fixed" colliders="cuboid" collisionGroups={YMPARISTO}>
-        <mesh position={[x, 2.6, 0]}>
-          <boxGeometry args={[0.2, 0.8, PITUUS]} />
-          <meshStandardMaterial color="#3a2f28" />
-        </mesh>
+        <mesh geometry={ylareunaGeo} material={seinaMat} position={[x, 2.6, 0]} />
       </RigidBody>
 
       {/* Umpiseinä ensimmäisen ja viimeisen ikkunan ohi jäävien aukkojen
           kohdalle (z=±21), jottei seinään jää reikää. */}
       {[-21, 21].map((zi) => (
         <RigidBody key={`umpi-${zi}`} type="fixed" colliders="cuboid">
-          <mesh position={[x, 1.55, zi]}>
-            <boxGeometry args={[0.2, 1.3, 3.0]} />
-            <meshStandardMaterial color="#3a2f28" />
-          </mesh>
+          <mesh geometry={umpiGeo} material={seinaMat} position={[x, 1.55, zi]} />
         </RigidBody>
       ))}
 
       {/* Umpiseinä ikkunan ja päädyn väliin jääneeseen rakoon (väliseinän kohta). */}
       {[-18, 18].map((zi) => (
         <RigidBody key={`rako-${zi}`} type="fixed" colliders="cuboid">
-          <mesh position={[x, 1.55, zi]}>
-            <boxGeometry args={[0.2, 1.3, 2.0]} />
-            <meshStandardMaterial color="#3a2f28" />
-          </mesh>
+          <mesh geometry={rakoGeo} material={seinaMat} position={[x, 1.55, zi]} />
         </RigidBody>
       ))}
 
       {/* Pystypalkit ikkunoiden väleissä. */}
       {palkit.map((zi) => (
         <RigidBody key={zi} type="fixed" colliders="cuboid" collisionGroups={YMPARISTO}>
-          <mesh position={[x, 1.5, zi]}>
-            <boxGeometry args={[0.2, 3, 0.8]} />
-            <meshStandardMaterial color="#3a2f28" />
-          </mesh>
+          <mesh geometry={palkkiGeo} material={seinaMat} position={[x, 1.5, zi]} />
         </RigidBody>
       ))}
 
       {/* Ikkunalasit aukkoihin. */}
       {ikkunat.map((zi) => (
         <RigidBody key={zi} type="fixed" colliders="cuboid" collisionGroups={YMPARISTO}>
-          <mesh position={[x, 1.55, zi]}>
-            <boxGeometry args={[0.1, 1.3, 3.0]} />
-            <meshStandardMaterial
-              color="#0a0a14"
-              transparent
-              opacity={0.4}
-              roughness={0.1}
-              metalness={0}
-            />
-          </mesh>
+          <mesh geometry={lasiGeo} material={lasiMat} position={[x, 1.55, zi]} />
         </RigidBody>
       ))}
 
       {/* Ikkunakehykset: listakehys jokaisen ikkuna-aukon ympärillä. */}
       {ikkunat.map((zi) => (
         <group key={`kehys-${zi}`}>
-          <mesh position={[x - puoli * 0.06, 0.9, zi]}>
-            <boxGeometry args={[0.1, 0.08, 3.0]} />
-            <meshStandardMaterial color="#4a4038" roughness={0.6} metalness={0.3} />
-          </mesh>
-          <mesh position={[x - puoli * 0.06, 2.2, zi]}>
-            <boxGeometry args={[0.1, 0.08, 3.0]} />
-            <meshStandardMaterial color="#4a4038" roughness={0.6} metalness={0.3} />
-          </mesh>
+          <mesh geometry={kehysVaakaGeo} material={kehysMat} position={[x - puoli * 0.06, 0.9, zi]} />
+          <mesh geometry={kehysVaakaGeo} material={kehysMat} position={[x - puoli * 0.06, 2.2, zi]} />
           {[-1.5, 1.5].map((rz) => (
-            <mesh key={rz} position={[x - puoli * 0.06, 1.55, zi + rz]}>
-              <boxGeometry args={[0.1, 1.3, 0.1]} />
-              <meshStandardMaterial color="#4a4038" roughness={0.6} metalness={0.3} />
-            </mesh>
+            <mesh key={rz} geometry={kehysPystyGeo} material={kehysMat} position={[x - puoli * 0.06, 1.55, zi + rz]} />
           ))}
         </group>
       ))}
