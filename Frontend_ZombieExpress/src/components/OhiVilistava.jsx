@@ -6,7 +6,7 @@ import { useRef, useMemo } from 'react'
 // puoli = -1 vasen, +1 oikea. nopeus = liikkeen vauhti.
 export function OhiVilistava({ puoli = -1, nopeus = 20 }) {
   // Kuinka pitkälle maisema ulottuu junan suuntaisesti.
-  const alku = -160
+  const alku = -560
   const loppu = 30
   const pituus = loppu - alku
 
