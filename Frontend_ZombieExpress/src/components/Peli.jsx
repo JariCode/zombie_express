@@ -1,4 +1,5 @@
 import { Canvas } from '@react-three/fiber'
+import { Perf } from 'r3f-perf'
 import { PointerLockControls } from '@react-three/drei'
 import { Physics } from '@react-three/rapier'
 import { useRef, useCallback, useState, useEffect } from 'react'
@@ -93,6 +94,9 @@ export function Peli({ otaVahinkoa, peliOhi }) {
   return (
     <>
       <Canvas shadows camera={{ position: [0, 1.6, 3], fov: 75 }}>
+        {/* Suorituskykymittari: näyttää FPS, GPU-ajan, draw callit (calls) ja
+            meshit. Poista tämä rivi kun mittaus on tehty. */}
+        <Perf position="top-left" />
         {/* Yön musta taivas taustalla. */}
         <color attach="background" args={['#02020a']} />
 
