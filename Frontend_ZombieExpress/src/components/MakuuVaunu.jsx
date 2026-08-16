@@ -5,6 +5,24 @@ import { Html } from '@react-three/drei'
 import { Ovi } from './Ovi'
 import { VaunuValo } from './VaunuValo'
 import { usePelaajanPaikka } from '../hooks/usePelaajanPaikka'
+import * as THREE from 'three'
+
+// Jaetut materiaalit ja geometriat. Hytti toistuu 11 kertaa per vaunu ja
+// makuuvaunuja on kuusi, joten ilman jakoa syntyisi tuhansia identtisiä
+// materiaaleja ja geometrioita. Nyt kaikki hytit käyttävät samoja, mikä
+// keventää muistia ja poistaa nykimisen kun vaunu tulee näkyviin.
+const mSeina = new THREE.MeshStandardMaterial({ color: '#3a2f28' })
+const mSeinaRuskea = new THREE.MeshStandardMaterial({ color: '#2e2620', roughness: 0.85 })
+const mPaaty = new THREE.MeshStandardMaterial({ color: '#2a2320', metalness: 0.3, roughness: 0.7 })
+const mHytinSeina = new THREE.MeshStandardMaterial({ color: '#353029', roughness: 0.8 })
+const mKehys = new THREE.MeshStandardMaterial({ color: '#4a4038', roughness: 0.6, metalness: 0.3 })
+const mKehysB = new THREE.MeshStandardMaterial({ color: '#4a4038', metalness: 0.4, roughness: 0.6 })
+const mMetalliListaa = new THREE.MeshStandardMaterial({ color: '#26262e', metalness: 0.5, roughness: 0.5 })
+const mKahva = new THREE.MeshStandardMaterial({ color: '#6a6a72', metalness: 0.8, roughness: 0.3 })
+const mListaKirkas = new THREE.MeshStandardMaterial({ color: '#6a6a72', metalness: 0.5, roughness: 0.5 })
+const mLasiTumma = new THREE.MeshStandardMaterial({ color: '#0a0a14', transparent: true, opacity: 0.5, roughness: 0.1 })
+const mOvirunko = new THREE.MeshStandardMaterial({ color: '#3a3a45', metalness: 0.6, roughness: 0.4 })
+
 
 // Makuuvaunun pituus, sama kuin muilla vaunuilla.
 const PITUUS = 44
@@ -27,46 +45,31 @@ function IkkunaSeinaVasen() {
   return (
     <group>
       {/* Alareuna koko seinän pituudelta. */}
-       <mesh position={[x, 0.3, 0]}>
-        <boxGeometry args={[0.2, 1.2, PITUUS]} />
-        <meshStandardMaterial color="#3a2f28" />
-      </mesh>
+       <mesh material={mSeina} position={[x, 0.3, 0]}><boxGeometry args={[0.2, 1.2, PITUUS]} /></mesh>
 
       {/* Yläreuna koko seinän pituudelta. */}
       <RigidBody type="fixed" colliders="cuboid">
-        <mesh position={[x, 2.6, 0]}>
-          <boxGeometry args={[0.2, 0.8, PITUUS]} />
-          <meshStandardMaterial color="#3a2f28" />
-        </mesh>
+        <mesh material={mSeina} position={[x, 2.6, 0]}><boxGeometry args={[0.2, 0.8, PITUUS]} /></mesh>
       </RigidBody>
 
       {/* Umpiseinä ensimmäisen ja viimeisen ikkunan ohi jäävien aukkojen kohdalle. */}
       {[-21, 21].map((zi) => (
         <RigidBody key={`umpi-${zi}`} type="fixed" colliders="cuboid">
-          <mesh position={[x, 1.55, zi]}>
-            <boxGeometry args={[0.2, 1.3, 3.0]} />
-            <meshStandardMaterial color="#3a2f28" />
-          </mesh>
+          <mesh material={mSeina} position={[x, 1.55, zi]}><boxGeometry args={[0.2, 1.3, 3.0]} /></mesh>
         </RigidBody>
       ))}
 
       {/* Umpiseinä ikkunan ja päädyn väliin jääneeseen rakoon. */}
       {[-18, 18].map((zi) => (
         <RigidBody key={`rako-${zi}`} type="fixed" colliders="cuboid">
-          <mesh position={[x, 1.55, zi]}>
-            <boxGeometry args={[0.2, 1.3, 2.0]} />
-            <meshStandardMaterial color="#3a2f28" />
-          </mesh>
+          <mesh material={mSeina} position={[x, 1.55, zi]}><boxGeometry args={[0.2, 1.3, 2.0]} /></mesh>
         </RigidBody>
       ))}
 
       {/* Pystypalkit ikkunoiden väleissä. */}
       {palkit.map((zi) => (
         <RigidBody key={zi} type="fixed" colliders="cuboid">
-          <mesh position={[x, 1.5, zi]}>
-            <boxGeometry args={[0.2, 3, 0.8]} />
-            <meshStandardMaterial color="#3a2f28" />
-          </mesh>
+          <mesh material={mSeina} position={[x, 1.5, zi]}><boxGeometry args={[0.2, 3, 0.8]} /></mesh>
         </RigidBody>
       ))}
 
@@ -83,19 +86,10 @@ function IkkunaSeinaVasen() {
       {/* Ikkunakehykset. */}
       {ikkunat.map((zi) => (
         <group key={`kehys-${zi}`}>
-          <mesh position={[x + 0.06, 0.9, zi]}>
-            <boxGeometry args={[0.1, 0.08, 3.0]} />
-            <meshStandardMaterial color="#4a4038" roughness={0.6} metalness={0.3} />
-          </mesh>
-          <mesh position={[x + 0.06, 2.2, zi]}>
-            <boxGeometry args={[0.1, 0.08, 3.0]} />
-            <meshStandardMaterial color="#4a4038" roughness={0.6} metalness={0.3} />
-          </mesh>
+          <mesh material={mKehys} position={[x + 0.06, 0.9, zi]}><boxGeometry args={[0.1, 0.08, 3.0]} /></mesh>
+          <mesh material={mKehys} position={[x + 0.06, 2.2, zi]}><boxGeometry args={[0.1, 0.08, 3.0]} /></mesh>
           {[-1.5, 1.5].map((rz) => (
-            <mesh key={rz} position={[x + 0.06, 1.55, zi + rz]}>
-              <boxGeometry args={[0.1, 1.3, 0.1]} />
-              <meshStandardMaterial color="#4a4038" roughness={0.6} metalness={0.3} />
-            </mesh>
+            <mesh material={mKehys} key={rz} position={[x + 0.06, 1.55, zi + rz]}><boxGeometry args={[0.1, 1.3, 0.1]} /></mesh>
           ))}
         </group>
       ))}
@@ -115,15 +109,9 @@ function UlkoSeinaIkkunoilla({ hytit }) {
   return (
     <group>
       {/* Ala- ja yläreuna koko pituudelta. */}
-      <mesh position={[x, 0.55, 0]}>
-        <boxGeometry args={[0.2, 1.1, PITUUS]} />
-        <meshStandardMaterial color="#2e2620" roughness={0.85} />
-      </mesh>
+      <mesh material={mSeinaRuskea} position={[x, 0.55, 0]}><boxGeometry args={[0.2, 1.1, PITUUS]} /></mesh>
       <RigidBody type="fixed" colliders="cuboid">
-        <mesh position={[x, 2.55, 0]}>
-          <boxGeometry args={[0.2, 0.9, PITUUS]} />
-          <meshStandardMaterial color="#2e2620" roughness={0.85} />
-        </mesh>
+        <mesh material={mSeinaRuskea} position={[x, 2.55, 0]}><boxGeometry args={[0.2, 0.9, PITUUS]} /></mesh>
       </RigidBody>
 
       {/* Umpiseinäpalat ikkuna-aukon molemmin puolin jokaisessa hytissä, niin
@@ -135,10 +123,7 @@ function UlkoSeinaIkkunoilla({ hytit }) {
           <group key={`umpi-${i}`}>
             {[-1, 1].map((puoli) => (
               <RigidBody key={puoli} type="fixed" colliders="cuboid">
-                <mesh position={[x, 1.55, hz + puoli * palaKeski]}>
-                  <boxGeometry args={[0.2, 1.3, palaLeveys]} />
-                  <meshStandardMaterial color="#2e2620" roughness={0.85} />
-                </mesh>
+                <mesh material={mSeinaRuskea} position={[x, 1.55, hz + puoli * palaKeski]}><boxGeometry args={[0.2, 1.3, palaLeveys]} /></mesh>
               </RigidBody>
             ))}
           </group>
@@ -147,20 +132,14 @@ function UlkoSeinaIkkunoilla({ hytit }) {
       {/* Päädyt (hyttialueen ulkopuoli). */}
       {[-20.5, 20.5].map((zi) => (
         <RigidBody key={zi} type="fixed" colliders="cuboid">
-          <mesh position={[x, 1.55, zi]}>
-            <boxGeometry args={[0.2, 1.3, 3.0]} />
-            <meshStandardMaterial color="#2e2620" roughness={0.85} />
-          </mesh>
+          <mesh material={mSeinaRuskea} position={[x, 1.55, zi]}><boxGeometry args={[0.2, 1.3, 3.0]} /></mesh>
         </RigidBody>
       ))}
       {/* Umpiseinä uloimpien hyttien reunan (z=±17) ja päätyjen väliin,
           jottei jää outoa ikkunarakoa. */}
       {[-18, 18].map((zi) => (
         <RigidBody key={`taytto-${zi}`} type="fixed" colliders="cuboid">
-          <mesh position={[x, 1.55, zi]}>
-            <boxGeometry args={[0.2, 1.3, 2.0]} />
-            <meshStandardMaterial color="#2e2620" roughness={0.85} />
-          </mesh>
+          <mesh material={mSeinaRuskea} position={[x, 1.55, zi]}><boxGeometry args={[0.2, 1.3, 2.0]} /></mesh>
         </RigidBody>
       ))}
 
@@ -185,19 +164,10 @@ function UlkoSeinaIkkunoilla({ hytit }) {
       {/* Ikkunakehykset hyttien kohdalle (aukon reunoille). */}
       {hytit.map((hz, i) => (
         <group key={`kehys-${i}`}>
-          <mesh position={[x - 0.06, 0.9, hz]}>
-            <boxGeometry args={[0.1, 0.08, aukko + 0.1]} />
-            <meshStandardMaterial color="#4a4038" roughness={0.6} metalness={0.3} />
-          </mesh>
-          <mesh position={[x - 0.06, 2.2, hz]}>
-            <boxGeometry args={[0.1, 0.08, aukko + 0.1]} />
-            <meshStandardMaterial color="#4a4038" roughness={0.6} metalness={0.3} />
-          </mesh>
+          <mesh material={mKehys} position={[x - 0.06, 0.9, hz]}><boxGeometry args={[0.1, 0.08, aukko + 0.1]} /></mesh>
+          <mesh material={mKehys} position={[x - 0.06, 2.2, hz]}><boxGeometry args={[0.1, 0.08, aukko + 0.1]} /></mesh>
           {[-aukko / 2, aukko / 2].map((rz) => (
-            <mesh key={rz} position={[x - 0.06, 1.55, hz + rz]}>
-              <boxGeometry args={[0.1, 1.3, 0.1]} />
-              <meshStandardMaterial color="#4a4038" roughness={0.6} metalness={0.3} />
-            </mesh>
+            <mesh material={mKehys} key={rz} position={[x - 0.06, 1.55, hz + rz]}><boxGeometry args={[0.1, 1.3, 0.1]} /></mesh>
           ))}
         </group>
       ))}
@@ -259,50 +229,29 @@ function HyttiOvi({ worldZ }) {
       <group ref={ovilevy} position={[0, 1.2, -0.7]}>
         <group position={[0, 0, 0.7]}>
           {/* Oven runko */}
-          <mesh>
-            <boxGeometry args={[0.1, 2.4, 1.4]} />
-            <meshStandardMaterial color="#3a3a45" metalness={0.6} roughness={0.4} />
-          </mesh>
+          <mesh material={mOvirunko}><boxGeometry args={[0.1, 2.4, 1.4]} /></mesh>
 
           {/* --- Molemmat puolet (x + ja -) --- */}
           {[1, -1].map((sivu) => (
             <group key={sivu}>
               {/* Ikkuna */}
-              <mesh position={[sivu * 0.02, 0.55, 0]}>
-                <boxGeometry args={[0.08, 0.9, 0.9]} />
-                <meshStandardMaterial color="#0a0a14" transparent opacity={0.5} roughness={0.1} />
-              </mesh>
+              <mesh material={mLasiTumma} position={[sivu * 0.02, 0.55, 0]}><boxGeometry args={[0.08, 0.9, 0.9]} /></mesh>
               {/* Ikkunan kehys */}
-              <mesh position={[sivu * 0.04, 0.55, 0]}>
-                <boxGeometry args={[0.04, 1.0, 1.0]} />
-                <meshStandardMaterial color="#26262e" metalness={0.5} roughness={0.5} />
-              </mesh>
+              <mesh material={mMetalliListaa} position={[sivu * 0.04, 0.55, 0]}><boxGeometry args={[0.04, 1.0, 1.0]} /></mesh>
               <mesh position={[sivu * 0.05, 0.55, 0]}>
                 <boxGeometry args={[0.02, 0.88, 0.88]} />
                 <meshStandardMaterial color="#0a0e18" transparent opacity={0.45} roughness={0.1} />
               </mesh>
               {/* Pystykahva (kaukana saranasta, +z-reunalla) */}
-              <mesh position={[sivu * 0.08, -0.1, 0.5]}>
-                <cylinderGeometry args={[0.03, 0.03, 0.5, 8]} />
-                <meshStandardMaterial color="#6a6a72" metalness={0.8} roughness={0.3} />
-              </mesh>
+              <mesh material={mKahva} position={[sivu * 0.08, -0.1, 0.5]}><cylinderGeometry args={[0.03, 0.03, 0.5, 8]} /></mesh>
               {/* Kahvan kiinnikkeet */}
-              <mesh position={[sivu * 0.05, 0.13, 0.5]} rotation={[0, 0, Math.PI / 2]}>
-                <cylinderGeometry args={[0.02, 0.02, 0.08, 8]} />
-                <meshStandardMaterial color="#6a6a72" metalness={0.8} roughness={0.3} />
-              </mesh>
-              <mesh position={[sivu * 0.05, -0.33, 0.5]} rotation={[0, 0, Math.PI / 2]}>
-                <cylinderGeometry args={[0.02, 0.02, 0.08, 8]} />
-                <meshStandardMaterial color="#6a6a72" metalness={0.8} roughness={0.3} />
-              </mesh>
+              <mesh material={mKahva} position={[sivu * 0.05, 0.13, 0.5]} rotation={[0, 0, Math.PI / 2]}><cylinderGeometry args={[0.02, 0.02, 0.08, 8]} /></mesh>
+              <mesh material={mKahva} position={[sivu * 0.05, -0.33, 0.5]} rotation={[0, 0, Math.PI / 2]}><cylinderGeometry args={[0.02, 0.02, 0.08, 8]} /></mesh>
             </group>
           ))}
 
           {/* Alareunan lista */}
-          <mesh position={[0, -1.05, 0]}>
-            <boxGeometry args={[0.06, 0.15, 1.4]} />
-            <meshStandardMaterial color="#26262e" metalness={0.5} roughness={0.5} />
-          </mesh>
+          <mesh material={mMetalliListaa} position={[0, -1.05, 0]}><boxGeometry args={[0.06, 0.15, 1.4]} /></mesh>
         </group>
       </group>
 
@@ -393,51 +342,27 @@ function Hytti({ z, leveys, vaununZ }) {
           <group>
             {/* Vessan -z-seinä: umpipala sängyn puolella (oviaukko käytäväpäässä). */}
             <RigidBody type="fixed" colliders="cuboid">
-              <mesh position={[umpiKeski, 1.5, koppiZsisa]}>
-                <boxGeometry args={[umpiLeveys, 3, 0.08]} />
-                <meshStandardMaterial color="#353029" roughness={0.8} />
-              </mesh>
+              <mesh material={mHytinSeina} position={[umpiKeski, 1.5, koppiZsisa]}><boxGeometry args={[umpiLeveys, 3, 0.08]} /></mesh>
             </RigidBody>
             {/* -z-seinän yläpala oviaukon päällä. */}
             <RigidBody type="fixed" colliders="cuboid">
-              <mesh position={[(seinaAlku + oviLoppu) / 2, 2.55, koppiZsisa]}>
-                <boxGeometry args={[oviLeveys, 0.9, 0.08]} />
-                <meshStandardMaterial color="#353029" roughness={0.8} />
-              </mesh>
+              <mesh material={mHytinSeina} position={[(seinaAlku + oviLoppu) / 2, 2.55, koppiZsisa]}><boxGeometry args={[oviLeveys, 0.9, 0.08]} /></mesh>
             </RigidBody>
             {/* Vessan hyttipuolen seinä (x=koppiXpaa), -z-seinästä sivuseinään. */}
             <RigidBody type="fixed" colliders="cuboid">
-              <mesh position={[koppiXpaa, 1.5, (koppiZsisa + puolileveys) / 2]}>
-                <boxGeometry args={[0.08, 3, puolileveys - koppiZsisa]} />
-                <meshStandardMaterial color="#353029" roughness={0.8} />
-              </mesh>
+              <mesh material={mHytinSeina} position={[koppiXpaa, 1.5, (koppiZsisa + puolileveys) / 2]}><boxGeometry args={[0.08, 3, puolileveys - koppiZsisa]} /></mesh>
             </RigidBody>
 
             {/* Vessan ovi -z-seinässä (käytäväpäässä), sama tyyli kuin muissa
                 vessoissa: runko, ikkuna, vetokahvat. Aukko x-suunnassa. */}
             <group position={[(seinaAlku + oviLoppu) / 2, 1.15, koppiZsisa]}>
-              <mesh>
-                <boxGeometry args={[oviLeveys, 2.2, 0.06]} />
-                <meshStandardMaterial color="#3a3a45" metalness={0.6} roughness={0.4} />
-              </mesh>
+              <mesh material={mOvirunko}><boxGeometry args={[oviLeveys, 2.2, 0.06]} /></mesh>
               {/* Ikkuna molemmin puolin */}
-              <mesh position={[0, 0.35, 0.03]}>
-                <boxGeometry args={[0.5, 0.6, 0.04]} />
-                <meshStandardMaterial color="#0a0a14" transparent opacity={0.5} roughness={0.1} />
-              </mesh>
-              <mesh position={[0, 0.35, -0.03]}>
-                <boxGeometry args={[0.5, 0.6, 0.04]} />
-                <meshStandardMaterial color="#0a0a14" transparent opacity={0.5} roughness={0.1} />
-              </mesh>
+              <mesh material={mLasiTumma} position={[0, 0.35, 0.03]}><boxGeometry args={[0.5, 0.6, 0.04]} /></mesh>
+              <mesh material={mLasiTumma} position={[0, 0.35, -0.03]}><boxGeometry args={[0.5, 0.6, 0.04]} /></mesh>
               {/* Vetokahvat molemmin puolin */}
-              <mesh position={[0.28, -0.05, 0.05]}>
-                <boxGeometry args={[0.06, 0.28, 0.04]} />
-                <meshStandardMaterial color="#6a6a72" metalness={0.8} roughness={0.3} />
-              </mesh>
-              <mesh position={[0.28, -0.05, -0.05]}>
-                <boxGeometry args={[0.06, 0.28, 0.04]} />
-                <meshStandardMaterial color="#6a6a72" metalness={0.8} roughness={0.3} />
-              </mesh>
+              <mesh material={mKahva} position={[0.28, -0.05, 0.05]}><boxGeometry args={[0.06, 0.28, 0.04]} /></mesh>
+              <mesh material={mKahva} position={[0.28, -0.05, -0.05]}><boxGeometry args={[0.06, 0.28, 0.04]} /></mesh>
             </group>
 
             {/* Pönttö sivuseinää vasten. */}
@@ -513,22 +438,13 @@ function Paatyseina({ z }) {
   return (
     <group position={[0, 0, z]}>
       <RigidBody type="fixed" colliders="cuboid">
-        <mesh position={[-1.85, 1.5, 0]}>
-          <boxGeometry args={[2.3, 3, 0.2]} />
-          <meshStandardMaterial color="#2a2320" metalness={0.3} roughness={0.7} />
-        </mesh>
+        <mesh material={mPaaty} position={[-1.85, 1.5, 0]}><boxGeometry args={[2.3, 3, 0.2]} /></mesh>
       </RigidBody>
       <RigidBody type="fixed" colliders="cuboid">
-        <mesh position={[1.85, 1.5, 0]}>
-          <boxGeometry args={[2.3, 3, 0.2]} />
-          <meshStandardMaterial color="#2a2320" metalness={0.3} roughness={0.7} />
-        </mesh>
+        <mesh material={mPaaty} position={[1.85, 1.5, 0]}><boxGeometry args={[2.3, 3, 0.2]} /></mesh>
       </RigidBody>
       <RigidBody type="fixed" colliders="cuboid">
-        <mesh position={[0, 2.7, 0]}>
-          <boxGeometry args={[1.4, 0.6, 0.2]} />
-          <meshStandardMaterial color="#2a2320" metalness={0.3} roughness={0.7} />
-        </mesh>
+        <mesh material={mPaaty} position={[0, 2.7, 0]}><boxGeometry args={[1.4, 0.6, 0.2]} /></mesh>
       </RigidBody>
     </group>
   )
@@ -633,45 +549,27 @@ export function MakuuVaunu({ z, eka = false }) {
           <group key={suunta}>
             {/* Oikea seinäpala (oviaukon oikea puoli ulkoseinään). */}
             <RigidBody type="fixed" colliders={false}>
-              <mesh position={[0.75, 1.5, valiseinaZ]}>
-                <boxGeometry args={[4.5, 3, 0.2]} />
-                <meshStandardMaterial color="#2a2320" metalness={0.3} roughness={0.7} />
-              </mesh>
+              <mesh material={mPaaty} position={[0.75, 1.5, valiseinaZ]}><boxGeometry args={[4.5, 3, 0.2]} /></mesh>
               <CuboidCollider args={[2.25, 1.5, 0.1]} position={[0.75, 1.5, valiseinaZ]} />
             </RigidBody>
             {/* Vasen seinäpala (oviaukon vasen puoli ulkoseinään). */}
             <RigidBody type="fixed" colliders={false}>
-              <mesh position={[-2.85, 1.5, valiseinaZ]}>
-                <boxGeometry args={[0.3, 3, 0.2]} />
-                <meshStandardMaterial color="#2a2320" metalness={0.3} roughness={0.7} />
-              </mesh>
+              <mesh material={mPaaty} position={[-2.85, 1.5, valiseinaZ]}><boxGeometry args={[0.3, 3, 0.2]} /></mesh>
               <CuboidCollider args={[0.15, 1.5, 0.1]} position={[-2.85, 1.5, valiseinaZ]} />
             </RigidBody>
             {/* Yläpala oviaukon päällä (täyttää aukon tasan, ei rakoa). */}
             <RigidBody type="fixed" colliders={false}>
-              <mesh position={[-2.1, 2.7, valiseinaZ]}>
-                <boxGeometry args={[1.2, 0.6, 0.2]} />
-                <meshStandardMaterial color="#2a2320" metalness={0.3} roughness={0.7} />
-              </mesh>
+              <mesh material={mPaaty} position={[-2.1, 2.7, valiseinaZ]}><boxGeometry args={[1.2, 0.6, 0.2]} /></mesh>
               <CuboidCollider args={[0.6, 0.3, 0.1]} position={[-2.1, 2.7, valiseinaZ]} />
             </RigidBody>
             {/* Oviaukon kehyslistat (aukon reunoilla x=-2.7 ja -1.5). */}
-            <mesh position={[-2.7, 1.2, valiseinaZ]}>
-              <boxGeometry args={[0.08, 2.4, 0.24]} />
-              <meshStandardMaterial color="#6a6a72" metalness={0.5} roughness={0.5} />
-            </mesh>
-            <mesh position={[-1.5, 1.2, valiseinaZ]}>
-              <boxGeometry args={[0.08, 2.4, 0.24]} />
-              <meshStandardMaterial color="#6a6a72" metalness={0.5} roughness={0.5} />
-            </mesh>
+            <mesh material={mListaKirkas} position={[-2.7, 1.2, valiseinaZ]}><boxGeometry args={[0.08, 2.4, 0.24]} /></mesh>
+            <mesh material={mListaKirkas} position={[-1.5, 1.2, valiseinaZ]}><boxGeometry args={[0.08, 2.4, 0.24]} /></mesh>
 
             {/* Ulko-ovet molemmilla sivuseinillä. */}
             {[-1, 1].map((puoli) => (
               <group key={puoli} position={[puoli * 2.92, 0, valikkoZ]}>
-                <mesh position={[0, 1.15, 0]}>
-                  <boxGeometry args={[0.06, 2.4, 1.5]} />
-                  <meshStandardMaterial color="#4a4038" metalness={0.4} roughness={0.6} />
-                </mesh>
+                <mesh material={mKehysB} position={[0, 1.15, 0]}><boxGeometry args={[0.06, 2.4, 1.5]} /></mesh>
                 <mesh position={[puoli * -0.04, 1.15, 0]}>
                   <boxGeometry args={[0.06, 2.2, 1.3]} />
                   <meshStandardMaterial color="#5a5560" metalness={0.5} roughness={0.5} />
@@ -680,10 +578,7 @@ export function MakuuVaunu({ z, eka = false }) {
                   <boxGeometry args={[0.04, 1.0, 1.0]} />
                   <meshStandardMaterial color="#0a0e18" transparent opacity={0.45} roughness={0.1} metalness={0} />
                 </mesh>
-                <mesh position={[puoli * -0.06, 1.55, 0]}>
-                  <boxGeometry args={[0.03, 1.1, 1.1]} />
-                  <meshStandardMaterial color="#26262e" metalness={0.5} roughness={0.5} />
-                </mesh>
+                <mesh material={mMetalliListaa} position={[puoli * -0.06, 1.55, 0]}><boxGeometry args={[0.03, 1.1, 1.1]} /></mesh>
                 <mesh position={[puoli * -0.1, 0.9, puoli * 0.4]}>
                   <boxGeometry args={[0.04, 0.5, 0.06]} />
                   <meshStandardMaterial color="#8a8a92" metalness={0.8} roughness={0.3} />
