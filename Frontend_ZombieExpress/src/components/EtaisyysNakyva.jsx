@@ -8,11 +8,10 @@ import { usePelaajanPaikka } from '../hooks/usePelaajanPaikka'
 // Piilotettua ryhmää ei piirretä, joten kaukaiset vaunut eivät kuormita
 // renderöintiä.
 //
-// keskiZ = kohteen z-keskikohta. raja 90 = nykyinen vaunu sekä pari edellistä
-// ja seuraavaa näkyvissä. Raja on tarkoituksella reilu, jotta seuraava vaunu
-// ehtii tulla näkyviin jo vaunun keskivaiheilla, ei vasta oviaukossa. Näin
-// näkyviin tulon piikki ei osu keskelle vaunusta toiseen kävelyä.
-export function EtaisyysNakyva({ keskiZ, raja = 90, children }) {
+// keskiZ = kohteen z-keskikohta. raja 60 on juuri yli vaunuvälin (45.5), joten
+// näkyvissä on oma vaunu ja sen välittömät naapurit (joihin näkee avoimesta
+// ovesta), mutta ei kauempia. Tiukempi raja vilkuttaisi naapuria oviaukossa.
+export function EtaisyysNakyva({ keskiZ, raja = 60, children }) {
   const pelaajanPaikka = usePelaajanPaikka()
   const ryhma = useRef()
   const tarkistus = useRef(0)
