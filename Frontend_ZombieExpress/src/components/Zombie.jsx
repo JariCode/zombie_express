@@ -7,6 +7,12 @@ import * as THREE from 'three'
 import { usePelaajanPaikka } from '../hooks/usePelaajanPaikka'
 import { useVahinko } from '../hooks/usePelaajanVahinko'
 
+// Pelaajan vahinkoääni ladataan kerran moduulitasolle. Ennen se luotiin joka
+// puraisulla (new Audio), mikä latasi mp3:n uudelleen ja aiheutti tökkäyksen.
+// Nyt sama ääni kloonataan kevyesti jokaista puraisua varten.
+const puremaAani = new Audio('/audio/sfx/hurt.mp3')
+puremaAani.volume = 1
+
 // Yksi zombie: liikkuu hitaasti kohti pelaajaa.
 // aloitusZ määrää mihin kohtaan käytävää zombie ilmestyy.
 // id yksilöi zombien. hp/maxHp kestopisteet, malli/scale ulkonäkö.
@@ -125,13 +131,12 @@ export function Zombie({ id, aloitusZ = -15, hp, maxHp, onRef, peliOhi, malli, s
     if (peliOhi) return
 
     const paikka = body.current.translation()
-    const zombie = new THREE.Vector3(paikka.x, paikka.y, paikka.z)
 
-    // Suunta pelaajaa kohti vaakatasossa.
+    // Suunta pelaajaa kohti vaakatasossa (ei luoda uutta vektoria joka frame).
     suunta.current.set(
-      pelaajanPaikka.x - zombie.x,
+      pelaajanPaikka.x - paikka.x,
       0,
-      pelaajanPaikka.z - zombie.z
+      pelaajanPaikka.z - paikka.z
     )
     const etaisyys = suunta.current.length()
     suunta.current.normalize()
@@ -145,11 +150,11 @@ export function Zombie({ id, aloitusZ = -15, hp, maxHp, onRef, peliOhi, malli, s
     if (etaisyys < 1.5) {
       if (puremaAjastin.current <= 0) {
         otaVahinkoa(10)
-        
-        // Soitetaan vahinkoääni tässä
-        const hurtAani = new Audio('/audio/sfx/hurt.mp3')
-        hurtAani.volume = 1
-        hurtAani.play().catch(() => {})
+
+        // Soitetaan vahinkoääni (klooni esiladatusta, ei uutta latausta).
+        const aani = puremaAani.cloneNode()
+        aani.volume = 1
+        aani.play().catch(() => {})
 
         puremaAjastin.current = 1
       }

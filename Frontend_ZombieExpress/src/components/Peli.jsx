@@ -118,7 +118,7 @@ export function Peli({ otaVahinkoa, peliOhi }) {
         ))}
 
         {/* Fysiikkamaailma: kaikki törmäävät objektit tulevat tänne sisään. */}
-        <Physics>
+        <Physics timeStep="vary">
           <Juna />
 
           <Liikkuja />
