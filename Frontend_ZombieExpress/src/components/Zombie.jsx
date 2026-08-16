@@ -13,6 +13,16 @@ import { useVahinko } from '../hooks/usePelaajanVahinko'
 const puremaAani = new Audio('/audio/sfx/hurt.mp3')
 puremaAani.volume = 1
 
+// Kuolinääni esiladataan kerran ja kloonataan jokaista kuolemaa varten, ettei
+// mp3:ta ladata uudelleen kun zombie kuolee (aiheutti tökkäyksen ammuttaessa).
+const kuolinAaniPohja = new Audio('/audio/sfx/death.mp3')
+kuolinAaniPohja.volume = 1
+
+// Murinaäänen pohja esiladataan kerran. Jokainen elossa oleva zombie kloonaa
+// oman loopattavan instanssinsa tästä, ettei mp3:ta ladata uudelleen jokaista
+// zombieta mountattaessa.
+const murinaAaniPohja = new Audio('/audio/sfx/matalaamurinaa.mp3')
+
 // Yksi zombie: liikkuu hitaasti kohti pelaajaa.
 // aloitusZ määrää mihin kohtaan käytävää zombie ilmestyy.
 // id yksilöi zombien. hp/maxHp kestopisteet, malli/scale ulkonäkö.
@@ -84,7 +94,7 @@ export function Zombie({ id, aloitusZ = -15, hp, maxHp, onRef, peliOhi, malli, s
         if (a) a.paused = true
       })
 
-      const kuolinAani = new Audio('/audio/sfx/death.mp3')
+      const kuolinAani = kuolinAaniPohja.cloneNode()
       kuolinAani.volume = 1
       kuolinAani.play().catch(() => {})
     }
@@ -93,7 +103,7 @@ export function Zombie({ id, aloitusZ = -15, hp, maxHp, onRef, peliOhi, malli, s
   // Murinaa loopilla aina kun zombie on elossa.
   useEffect(() => {
     if (kuoleva) return
-    const murinaAani = new Audio('/audio/sfx/matalaamurinaa.mp3')
+    const murinaAani = murinaAaniPohja.cloneNode()
     murinaAani.loop = true
     murinaAani.volume = 0.4
     murinaAani.play().catch(() => {})
