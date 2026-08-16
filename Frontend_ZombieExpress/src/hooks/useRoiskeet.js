@@ -9,10 +9,10 @@ export function useRoiskeet() {
   const lisaaRoiske = useCallback((x, y, z) => {
     const id = seuraavaId.current++
     setRoiskeet((vanha) => [...vanha, { id, x, y, z }])
-    // Poistetaan roiske 400ms kuluttua.
+    // Poistetaan roiske 600ms kuluttua (partikkelit ehtivät häipyä).
     setTimeout(() => {
       setRoiskeet((vanha) => vanha.filter((r) => r.id !== id))
-    }, 400)
+    }, 600)
   }, [])
 
   return { roiskeet, lisaaRoiske }
