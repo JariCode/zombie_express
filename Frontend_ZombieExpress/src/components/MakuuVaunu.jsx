@@ -1,11 +1,16 @@
 import { useFrame } from '@react-three/fiber'
-import { useRef, useState, useEffect } from 'react'
+import { useRef, useState, useEffect, useMemo, useLayoutEffect } from 'react'
 import { RigidBody, CuboidCollider } from '@react-three/rapier'
 import { Html } from '@react-three/drei'
 import { Ovi } from './Ovi'
 import { VaunuValo } from './VaunuValo'
 import { usePelaajanPaikka } from '../hooks/usePelaajanPaikka'
 import * as THREE from 'three'
+
+// Käytäväseinän x-sijainti. Käytävä on kapea vasemmalla (x -3..-1.5) ja hytit
+// syvät oikealla (x -1.5..3, syvyys 4.5). Määritelty ennen geometrioita, koska
+// osa geometrioista käyttää tätä.
+const KAYTAVA_SEINA = -1.5
 
 // Jaetut materiaalit ja geometriat. Hytti toistuu 11 kertaa per vaunu ja
 // makuuvaunuja on kuusi, joten ilman jakoa syntyisi tuhansia identtisiä
@@ -23,13 +28,44 @@ const mListaKirkas = new THREE.MeshStandardMaterial({ color: '#6a6a72', metalnes
 const mLasiTumma = new THREE.MeshStandardMaterial({ color: '#0a0a14', transparent: true, opacity: 0.5, roughness: 0.1 })
 const mOvirunko = new THREE.MeshStandardMaterial({ color: '#3a3a45', metalness: 0.6, roughness: 0.4 })
 
+// Hyttien jaetut materiaalit ja geometriat (instansointia varten).
+const mSeinaVari = new THREE.MeshStandardMaterial({ color: '#2a2320', metalness: 0.2, roughness: 0.8 })
+const mPonttö = new THREE.MeshStandardMaterial({ color: '#c8c8cc', roughness: 0.3 })
+const mLavuaari = new THREE.MeshStandardMaterial({ color: '#d0d0d4', roughness: 0.3, metalness: 0.2 })
+const mSankyAla = new THREE.MeshStandardMaterial({ color: '#4a3a4a', roughness: 0.85 })
+const mSankyYla = new THREE.MeshStandardMaterial({ color: '#3a4a4a', roughness: 0.85 })
+const mTyyny = new THREE.MeshStandardMaterial({ color: '#8a8288', roughness: 0.9 })
+const mTolppa = new THREE.MeshStandardMaterial({ color: '#2a2420', metalness: 0.4, roughness: 0.5 })
+const mPoyta = new THREE.MeshStandardMaterial({ color: '#5a4a3a', roughness: 0.6, metalness: 0.1 })
+const mTuoli = new THREE.MeshStandardMaterial({ color: '#3a2e2e', roughness: 0.85 })
+
+// Geometriat jaetaan; hyttileveys 34/11 on vakio, joten leveydestä riippuvat
+// mitat ovat samat kaikille hyteille.
+const HYTTI_LEVEYS = 34 / 11
+const HYTTI_PUOLI = HYTTI_LEVEYS / 2
+const valiseinaGeo = new THREE.BoxGeometry(3 - KAYTAVA_SEINA, 3, 0.1)
+const kaytavaYlaGeo = new THREE.BoxGeometry(0.12, 0.6, HYTTI_LEVEYS)
+const kaytavaPalaGeo = new THREE.BoxGeometry(0.12, 3, HYTTI_PUOLI - 0.7)
+const vessaZseinaGeo = new THREE.BoxGeometry(1.0, 3, 0.08)
+const vessaYlaGeo = new THREE.BoxGeometry(0.9, 0.9, 0.08)
+const vessaSivuGeo = new THREE.BoxGeometry(0.08, 3, HYTTI_PUOLI - 0.72)
+const vessaOviGeo = new THREE.BoxGeometry(0.9, 2.2, 0.06)
+const vessaLasiGeo = new THREE.BoxGeometry(0.5, 0.6, 0.04)
+const vessaKahvaGeo = new THREE.BoxGeometry(0.06, 0.28, 0.04)
+const ponttoGeo = new THREE.BoxGeometry(0.4, 0.56, 0.4)
+const lavuaariGeo = new THREE.BoxGeometry(0.3, 0.12, 0.3)
+const sankyGeo = new THREE.BoxGeometry(2.2, 0.16, 0.75)
+const tyynyGeo = new THREE.BoxGeometry(0.4, 0.12, 0.55)
+const tolppaGeo = new THREE.BoxGeometry(0.06, 2.3, 0.06)
+const poytaTasoGeo = new THREE.BoxGeometry(0.6, 0.05, 0.6)
+const poytaJalkaGeo = new THREE.BoxGeometry(0.08, 0.72, 0.08)
+const tuoliIstuinGeo = new THREE.BoxGeometry(0.4, 0.08, 0.4)
+const tuoliSelkaGeo = new THREE.BoxGeometry(0.08, 0.5, 0.4)
+
+
 
 // Makuuvaunun pituus, sama kuin muilla vaunuilla.
 const PITUUS = 44
-
-// Käytäväseinän x-sijainti. Käytävä on kapea vasemmalla (x -3..-1.5) ja hytit
-// syvät oikealla (x -1.5..3, syvyys 4.5).
-const KAYTAVA_SEINA = -1.5
 
 // Vasemman puolen ikkunaseinä (käytävän puoli). Sama ikkunarakenne kuin
 // muissa vaunuissa, mutta ilman matkatavarahyllyä.
@@ -275,165 +311,150 @@ function HyttiOvi({ worldZ }) {
 //   x-suunnassa (pää ikkunalla, jalkopää vessan kohdalla).
 // - Pöytä, tuoli ja ikkuna ulkoseinällä (x=3), suoraan oven vastapäätä.
 // - -z-sivu vapaata kulkutilaa, jota vasten hytin ovi aukeaa.
-function Hytti({ z, leveys, vaununZ }) {
-  const seinaVari = '#2a2320'
+
+// Yksi instansoitu osatyyppi (sama geometria ja materiaali monessa paikassa).
+function InstanssiOsa({ geo, mat, matriisit, castShadow = false }) {
+  const ref = useRef()
+  useLayoutEffect(() => {
+    if (!ref.current) return
+    for (let i = 0; i < matriisit.length; i++) {
+      ref.current.setMatrixAt(i, matriisit[i])
+    }
+    ref.current.instanceMatrix.needsUpdate = true
+  }, [matriisit])
+  return <instancedMesh ref={ref} args={[geo, mat, matriisit.length]} castShadow={castShadow} />
+}
+
+// Kaikkien hyttien staattiset osat instansoituna. Jokainen osatyyppi (seinä,
+// sängyn patja, tolppa, vessan seinä jne) piirretään yhtenä InstancedMesh-
+// objektina kaikille 11 hytille, ei erillisinä meshinä per hytti. Näin hyttien
+// draw call -määrä putoaa murto-osaan. Animoituvat ovet ja törmäyslaatikot
+// tehdään erikseen per hytti (Hytti-komponentissa), koska ne eivät ole samaa
+// jaettavaa muotoa.
+function Hytit({ hytit, leveys }) {
   const puolileveys = leveys / 2
   const aukkoPuoli = 0.7
-
-  // Kalusteiden +z-reuna (sivuseinän vieressä).
   const sivuZ = puolileveys - 0.45
 
-  return (
-    <group position={[0, 0, z]}>
-      {/* ===== VÄLISEINÄT hyttien välissä (z-reunoilla) ===== */}
-      {[-1, 1].map((puoli) => (
-        <RigidBody key={puoli} type="fixed" colliders="cuboid">
-          <mesh position={[(KAYTAVA_SEINA + 3) / 2, 1.5, puoli * puolileveys]}>
-            <boxGeometry args={[3 - KAYTAVA_SEINA, 3, 0.1]} />
-            <meshStandardMaterial color={seinaVari} metalness={0.2} roughness={0.8} />
-          </mesh>
-        </RigidBody>
-      ))}
+  // Kootaan osatyypeittäin: jokaiselle (geometria, materiaali) -parille lista
+  // maailmamatriiseja (yksi per hytti).
+  const ryhmat = useMemo(() => {
+    const map = new Map()
+    const yksi = new THREE.Vector3(1, 1, 1)
+    const eiRot = new THREE.Quaternion()
 
-      {/* ===== KÄYTÄVÄSEINÄ + OVIAUKKO ===== */}
-      {/* Yläpuoli koko leveydeltä. */}
-      <RigidBody type="fixed" colliders="cuboid">
-        <mesh position={[KAYTAVA_SEINA, 2.7, 0]}>
-          <boxGeometry args={[0.12, 0.6, leveys]} />
-          <meshStandardMaterial color={seinaVari} metalness={0.2} roughness={0.8} />
-        </mesh>
-      </RigidBody>
-      {/* Seinäpalat oviaukon molemmin puolin (aukko keskellä, leveys 1.4). */}
-      {[-1, 1].map((puoli) => {
-        const palaLeveys = puolileveys - aukkoPuoli
+    // Apufunktio: lisää yhden osan matriisi tietylle (geo,mat) -parille.
+    const lisaa = (avain, geo, mat, x, y, z, castShadow = false) => {
+      if (!map.has(avain)) map.set(avain, { geo, mat, castShadow, matriisit: [] })
+      const m = new THREE.Matrix4().compose(new THREE.Vector3(x, y, z), eiRot, yksi)
+      map.get(avain).matriisit.push(m)
+    }
+
+    for (const hz of hytit) {
+      // Väliseinät hyttien välissä (z-reunoilla).
+      for (const puoli of [-1, 1]) {
+        lisaa('valiseina', valiseinaGeo, mSeinaVari, (KAYTAVA_SEINA + 3) / 2, 1.5, hz + puoli * puolileveys)
+      }
+      // Käytäväseinän yläpuoli.
+      lisaa('kaytavaYla', kaytavaYlaGeo, mSeinaVari, KAYTAVA_SEINA, 2.7, hz)
+      // Seinäpalat oviaukon molemmin puolin.
+      const palaLeveys = puolileveys - aukkoPuoli
+      for (const puoli of [-1, 1]) {
         const palaKeski = puoli * (aukkoPuoli + palaLeveys / 2)
-        return (
-          <RigidBody key={puoli} type="fixed" colliders="cuboid">
-            <mesh position={[KAYTAVA_SEINA, 1.5, palaKeski]}>
-              <boxGeometry args={[0.12, 3, palaLeveys]} />
-              <meshStandardMaterial color={seinaVari} metalness={0.2} roughness={0.8} />
-            </mesh>
-          </RigidBody>
-        )
-      })}
+        // Palan leveys vaihtelee vain jos leveys muuttuu; sama kaikille hyteille.
+        lisaa('kaytavaPala', kaytavaPalaGeo, mSeinaVari, KAYTAVA_SEINA, 1.5, hz + palaKeski)
+      }
 
-      {/* Hytin aukeava ovi (E), saranat ja kahva. */}
-      <HyttiOvi worldZ={vaununZ + z} />
+      // Vessan seinät.
+      const koppiXpaa = 0.4
+      const koppiZsisa = 0.72
+      const oviLeveys = 0.9
+      const seinaAlku = KAYTAVA_SEINA
+      const oviLoppu = seinaAlku + oviLeveys
+      const umpiKeski = (oviLoppu + koppiXpaa) / 2
+      lisaa('vessaZseina', vessaZseinaGeo, mHytinSeina, umpiKeski, 1.5, hz + koppiZsisa)
+      lisaa('vessaYla', vessaYlaGeo, mHytinSeina, (seinaAlku + oviLoppu) / 2, 2.55, hz + koppiZsisa)
+      lisaa('vessaSivu', vessaSivuGeo, mHytinSeina, koppiXpaa, 1.5, hz + (koppiZsisa + puolileveys) / 2)
+      // Vessan ovi.
+      lisaa('vessaOvi', vessaOviGeo, mOvirunko, (seinaAlku + oviLoppu) / 2, 1.15, hz + koppiZsisa)
+      lisaa('vessaLasiA', vessaLasiGeo, mLasiTumma, (seinaAlku + oviLoppu) / 2, 1.5, hz + koppiZsisa + 0.03)
+      lisaa('vessaLasiB', vessaLasiGeo, mLasiTumma, (seinaAlku + oviLoppu) / 2, 1.5, hz + koppiZsisa - 0.03)
+      lisaa('vessaKahvaA', vessaKahvaGeo, mKahva, (seinaAlku + oviLoppu) / 2 + 0.28, 1.1, hz + koppiZsisa + 0.05)
+      lisaa('vessaKahvaB', vessaKahvaGeo, mKahva, (seinaAlku + oviLoppu) / 2 + 0.28, 1.1, hz + koppiZsisa - 0.05)
+      // Pönttö ja lavuaari.
+      lisaa('ponttö', ponttoGeo, mPonttö, -0.1, 0.28, hz + sivuZ - 0.1)
+      lisaa('lavuaari', lavuaariGeo, mLavuaari, koppiXpaa - 0.25, 0.85, hz + sivuZ - 0.1)
 
-      {/* ===== VESSAKOPPI heti oikealla ovea, hytin +z-nurkassa ===== */}
-      {/* Vessa on nurkassa jossa on jo kaksi seinää: hytin +z-sivuseinä ja
-          käytäväseinä (x=KAYTAVA_SEINA). Tarvitaan vain yksi väliseinä joka
-          erottaa vessan hytin kulkutilasta, sekä vessan ovi. Seinä yltää
-          kattoon (korkeus 3). Koppi ulottuu käytäväseinästä x-suunnassa noin
-          1.1, z-suunnassa hytin +z-sivuseinästä noin 1.1. */}
-      {(() => {
-        // Vessa +z-nurkassa: käytäväseinästä sängyn jalkopäähän (x=-1.5..0.4),
-        // hytin +z-sivuseinää vasten. Ovi vessan -z-seinässä (aukeaa hyttiin).
-        const koppiXpaa = 0.4          // sängyn jalkopää, vessan hyttipuolen reuna
-        const koppiZsisa = 0.72 // vessan -z-seinä hytin oviaukon oikealla reunalla
-        const oviLeveys = 0.9
-        // Oviaukko -z-seinässä käytäväpäässä. -z-seinä jaetaan: oviaukko +
-        // umpipala sängyn puolelle.
-        const seinaAlku = KAYTAVA_SEINA
-        const oviLoppu = seinaAlku + oviLeveys
-        const umpiKeski = (oviLoppu + koppiXpaa) / 2
-        const umpiLeveys = koppiXpaa - oviLoppu
-        return (
-          <group>
-            {/* Vessan -z-seinä: umpipala sängyn puolella (oviaukko käytäväpäässä). */}
-            <RigidBody type="fixed" colliders="cuboid">
-              <mesh material={mHytinSeina} position={[umpiKeski, 1.5, koppiZsisa]}><boxGeometry args={[umpiLeveys, 3, 0.08]} /></mesh>
-            </RigidBody>
-            {/* -z-seinän yläpala oviaukon päällä. */}
-            <RigidBody type="fixed" colliders="cuboid">
-              <mesh material={mHytinSeina} position={[(seinaAlku + oviLoppu) / 2, 2.55, koppiZsisa]}><boxGeometry args={[oviLeveys, 0.9, 0.08]} /></mesh>
-            </RigidBody>
-            {/* Vessan hyttipuolen seinä (x=koppiXpaa), -z-seinästä sivuseinään. */}
-            <RigidBody type="fixed" colliders="cuboid">
-              <mesh material={mHytinSeina} position={[koppiXpaa, 1.5, (koppiZsisa + puolileveys) / 2]}><boxGeometry args={[0.08, 3, puolileveys - koppiZsisa]} /></mesh>
-            </RigidBody>
+      // Kerrossänky: kaksi patjaa, tyynyt, tolpat.
+      lisaa('sankyAla', sankyGeo, mSankyAla, 1.5, 0.55, hz + sivuZ, true)
+      lisaa('sankyYla', sankyGeo, mSankyYla, 1.5, 1.65, hz + sivuZ, true)
+      lisaa('tyynyA', tyynyGeo, mTyyny, 1.5 + 0.85, 0.68, hz + sivuZ)
+      lisaa('tyynyB', tyynyGeo, mTyyny, 1.5 + 0.85, 1.78, hz + sivuZ)
+      for (const tz of [-0.3, 0.3]) {
+        lisaa('tolppa', tolppaGeo, mTolppa, 0.45, 1.15, hz + sivuZ + tz)
+      }
 
-            {/* Vessan ovi -z-seinässä (käytäväpäässä), sama tyyli kuin muissa
-                vessoissa: runko, ikkuna, vetokahvat. Aukko x-suunnassa. */}
-            <group position={[(seinaAlku + oviLoppu) / 2, 1.15, koppiZsisa]}>
-              <mesh material={mOvirunko}><boxGeometry args={[oviLeveys, 2.2, 0.06]} /></mesh>
-              {/* Ikkuna molemmin puolin */}
-              <mesh material={mLasiTumma} position={[0, 0.35, 0.03]}><boxGeometry args={[0.5, 0.6, 0.04]} /></mesh>
-              <mesh material={mLasiTumma} position={[0, 0.35, -0.03]}><boxGeometry args={[0.5, 0.6, 0.04]} /></mesh>
-              {/* Vetokahvat molemmin puolin */}
-              <mesh material={mKahva} position={[0.28, -0.05, 0.05]}><boxGeometry args={[0.06, 0.28, 0.04]} /></mesh>
-              <mesh material={mKahva} position={[0.28, -0.05, -0.05]}><boxGeometry args={[0.06, 0.28, 0.04]} /></mesh>
-            </group>
+      // Pöytä ja tuoli.
+      lisaa('poytaTaso', poytaTasoGeo, mPoyta, 2.5, 0.72, hz - 0.6)
+      lisaa('poytaJalka', poytaJalkaGeo, mTolppa, 2.5, 0.36, hz - 0.6)
+      lisaa('tuoliIstuin', tuoliIstuinGeo, mTuoli, 1.9, 0.45, hz - 0.6)
+      lisaa('tuoliSelka', tuoliSelkaGeo, mTuoli, 1.9 - 0.16, 0.7, hz - 0.6)
+    }
 
-            {/* Pönttö sivuseinää vasten. */}
-            <mesh position={[-0.1, 0.28, sivuZ - 0.1]}>
-              <boxGeometry args={[0.4, 0.56, 0.4]} />
-              <meshStandardMaterial color="#c8c8cc" roughness={0.3} />
-            </mesh>
-            {/* Pieni lavuaari. */}
-            <mesh position={[koppiXpaa - 0.25, 0.85, sivuZ - 0.1]}>
-              <boxGeometry args={[0.3, 0.12, 0.3]} />
-              <meshStandardMaterial color="#d0d0d4" roughness={0.3} metalness={0.2} />
-            </mesh>
-          </group>
-        )
-      })()}
+    return [...map.values()]
+  }, [hytit, leveys])
 
-      {/* ===== KERROSSÄNKY vessan jälkeen, +z-sivuseinää vasten ===== */}
-      {/* Sängyt x-suunnassa. Pää ikkunalla (x=2.6), jalkopää vessan kohdalla (x=0.6). */}
-      {[0.55, 1.65].map((sy, i) => (
-        <RigidBody key={i} type="fixed" colliders="cuboid">
-          <group position={[1.5, sy, sivuZ]}>
-            <mesh castShadow>
-              <boxGeometry args={[2.2, 0.16, 0.75]} />
-              <meshStandardMaterial color={i === 0 ? '#4a3a4a' : '#3a4a4a'} roughness={0.85} />
-            </mesh>
-            {/* Tyyny ikkunan päässä */}
-            <mesh position={[0.85, 0.13, 0]}>
-              <boxGeometry args={[0.4, 0.12, 0.55]} />
-              <meshStandardMaterial color="#8a8288" roughness={0.9} />
-            </mesh>
-          </group>
-        </RigidBody>
+  return (
+    <group>
+      {ryhmat.map((r, i) => (
+        <InstanssiOsa key={i} geo={r.geo} mat={r.mat} matriisit={r.matriisit} castShadow={r.castShadow} />
       ))}
-      {/* Sängyn pystytolpat jalkopäässä. */}
-      {[-0.3, 0.3].map((tz, i) => (
-        <mesh key={i} position={[0.45, 1.15, sivuZ + tz]}>
-          <boxGeometry args={[0.06, 2.3, 0.06]} />
-          <meshStandardMaterial color="#2a2420" metalness={0.4} roughness={0.5} />
-        </mesh>
-      ))}
-
-      {/* ===== PÖYTÄ JA TUOLI ulkoseinällä (x=3), oven vastapäätä (z=0), -z-puolella ===== */}
-      <RigidBody type="fixed" colliders="cuboid">
-        <group position={[2.5, 0, -0.6]}>
-          <mesh position={[0, 0.72, 0]}>
-            <boxGeometry args={[0.6, 0.05, 0.6]} />
-            <meshStandardMaterial color="#5a4a3a" roughness={0.6} metalness={0.1} />
-          </mesh>
-          <mesh position={[0, 0.36, 0]}>
-            <boxGeometry args={[0.08, 0.72, 0.08]} />
-            <meshStandardMaterial color="#2a2420" metalness={0.4} roughness={0.5} />
-          </mesh>
-        </group>
-      </RigidBody>
-      <RigidBody type="fixed" colliders="cuboid">
-        <group position={[1.9, 0, -0.6]}>
-          <mesh position={[0, 0.45, 0]}>
-            <boxGeometry args={[0.4, 0.08, 0.4]} />
-            <meshStandardMaterial color="#3a2e2e" roughness={0.85} />
-          </mesh>
-          <mesh position={[-0.16, 0.7, 0]}>
-            <boxGeometry args={[0.08, 0.5, 0.4]} />
-            <meshStandardMaterial color="#3a2e2e" roughness={0.85} />
-          </mesh>
-        </group>
-      </RigidBody>
     </group>
   )
 }
 
-// Umpinainen päätyseinä (ensimmäisen vaunun takapäähän).
+function Hytti({ z, leveys, vaununZ }) {
+  const puolileveys = leveys / 2
+  const aukkoPuoli = 0.7
+  const sivuZ = puolileveys - 0.45
+
+  const koppiXpaa = 0.4
+  const koppiZsisa = 0.72
+  const palaLeveys = puolileveys - aukkoPuoli
+
+  return (
+    <group position={[0, 0, z]}>
+      {/* Törmäykset. Visuaaliset osat piirtää instansoitu Hytit-komponentti;
+          tässä vain colliderit ja aukeava ovi. */}
+
+      {/* Väliseinät hyttien välissä. */}
+      {[-1, 1].map((puoli) => (
+        <CuboidCollider key={`vali-${puoli}`} args={[(3 - KAYTAVA_SEINA) / 2, 1.5, 0.05]} position={[(KAYTAVA_SEINA + 3) / 2, 1.5, puoli * puolileveys]} />
+      ))}
+      {/* Käytäväseinän yläpuoli. */}
+      <CuboidCollider args={[0.06, 0.3, leveys / 2]} position={[KAYTAVA_SEINA, 2.7, 0]} />
+      {/* Seinäpalat oviaukon molemmin puolin. */}
+      {[-1, 1].map((puoli) => {
+        const palaKeski = puoli * (aukkoPuoli + palaLeveys / 2)
+        return (
+          <CuboidCollider key={`pala-${puoli}`} args={[0.06, 1.5, palaLeveys / 2]} position={[KAYTAVA_SEINA, 1.5, palaKeski]} />
+        )
+      })}
+      {/* Vessan seinät. */}
+      <CuboidCollider args={[0.5, 1.5, 0.04]} position={[-0.1, 1.5, koppiZsisa]} />
+      <CuboidCollider args={[0.04, 1.5, (puolileveys - koppiZsisa) / 2]} position={[koppiXpaa, 1.5, (koppiZsisa + puolileveys) / 2]} />
+      {/* Kerrossänky. */}
+      <CuboidCollider args={[1.1, 0.6, 0.375]} position={[1.5, 1.1, sivuZ]} />
+      {/* Pöytä ja tuoli. */}
+      <CuboidCollider args={[0.3, 0.4, 0.3]} position={[2.5, 0.4, -0.6]} />
+      <CuboidCollider args={[0.2, 0.4, 0.2]} position={[1.9, 0.4, -0.6]} />
+
+      {/* Hytin aukeava ovi (E), saranat ja kahva. */}
+      <HyttiOvi worldZ={vaununZ + z} />
+    </group>
+  )
+}
+
 function Paatyseina({ z }) {
   return (
     <group position={[0, 0, z]}>
@@ -526,6 +547,11 @@ export function MakuuVaunu({ z, eka = false }) {
       <UlkoSeinaIkkunoilla hytit={hytit} />
 
       {/* Hytit oikealla puolella. */}
+      {/* Kaikkien hyttien visuaaliset osat instansoituna (yksi draw call per
+          osatyyppi). */}
+      <Hytit hytit={hytit} leveys={hyttiLeveys} />
+
+      {/* Hyttien törmäykset ja aukeavat ovet (per hytti). */}
       {hytit.map((hz, i) => (
         <Hytti key={i} z={hz} leveys={hyttiLeveys} vaununZ={z} />
       ))}
