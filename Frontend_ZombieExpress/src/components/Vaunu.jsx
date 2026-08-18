@@ -31,6 +31,57 @@ const kehysVaakaGeo = new THREE.BoxGeometry(0.1, 0.08, 3.0)
 const kehysPystyGeo = new THREE.BoxGeometry(0.1, 1.3, 0.1)
 const kannatinGeo = new THREE.BoxGeometry(0.7, 0.04, 0.04)
 
+// Ikkunaverhojen jaetut resurssit. Verho tehdään ohuista pystyliuskoista jotka
+// ovat aaltomaisesti eri syvyyksillä (poimutettu kangas), ei laatikkomaisena.
+const verhoMat = new THREE.MeshStandardMaterial({ color: '#2e5a34', roughness: 0.9, side: THREE.DoubleSide })
+const verhoTankoGeo = new THREE.CylinderGeometry(0.025, 0.025, 3.2, 8)
+
+// Rakennetaan yhtenäinen aaltoileva verhokangas: pystysuora plane jonka
+// verteksit siirretään x-suunnassa siniaallon mukaan (pehmeä poimu, ei
+// kulmikkaita portaita). Jaetaan yksi geometria kummallekin reunalle.
+function teeVerhoGeo(sisaan) {
+  const leveys = 0.9
+  const korkeus = 1.25
+  const segZ = 40 // paljon segmenttejä -> sileä aalto
+  const segY = 1
+  const geo = new THREE.PlaneGeometry(leveys, korkeus, segZ, segY)
+  const pos = geo.attributes.position
+  for (let i = 0; i < pos.count; i++) {
+    const zPos = pos.getX(i) // planen leveysakseli
+    // Poimu: pinta aaltoilee sisään ja ulos leveyssuunnassa.
+    const aalto = Math.sin((zPos / leveys) * Math.PI * 6) * 0.05
+    pos.setZ(i, aalto * sisaan)
+  }
+  geo.computeVertexNormals()
+  // Käännetään plane pystyyn ikkunan eteen (leveysakseli z-suuntaan).
+  geo.rotateY(Math.PI / 2)
+  return geo
+}
+
+const verhoGeoSisaan = teeVerhoGeo(1)
+const verhoGeoUlos = teeVerhoGeo(-1)
+
+// Aaltoileva verho ikkunan yhteen reunaan. keskiZ = ikkunan keskikohta,
+// reuna = -1 vasen tai +1 oikea reuna, x = seinän x, sisaan = -1/+1 kumpaan
+// suuntaan verho työntyy huoneeseen.
+function Verho({ keskiZ, reuna, x, sisaan }) {
+  const leveysZ = 0.9
+  // Verhon keskikohta z: vasen reuna ikkunan vasemmassa laidassa, oikea oikeassa.
+  const keskiOffset = reuna === -1 ? -1.0 : 1.0
+  const z = keskiZ + keskiOffset
+  const geo = sisaan === 1 ? verhoGeoSisaan : verhoGeoUlos
+  return (
+    <group>
+      {/* Verhotanko ikkunan yläreunassa. */}
+      <mesh geometry={verhoTankoGeo} position={[x + sisaan * 0.06, 2.2, keskiZ]} rotation={[Math.PI / 2, 0, 0]}>
+        <meshStandardMaterial color="#3a3a40" metalness={0.6} roughness={0.4} />
+      </mesh>
+      {/* Yhtenäinen aaltoileva kangas. */}
+      <mesh geometry={geo} material={verhoMat} position={[x + sisaan * 0.06, 1.55, z]} />
+    </group>
+  )
+}
+
 // Yksi ikkunaseinä: pystypalkkeja joiden väliin jää ikkunat.
 // puoli = -1 vasen seinä, +1 oikea seinä.
 function IkkunaSeina({ puoli }) {
@@ -112,6 +163,15 @@ function IkkunaSeina({ puoli }) {
           {[-1.5, 1.5].map((rz) => (
             <mesh key={rz} geometry={kehysPystyGeo} material={kehysMat} position={[x - puoli * 0.06, 1.55, zi + rz]} />
           ))}
+        </group>
+      ))}
+
+      {/* Aaltoilevat verhot jokaisen ikkunan molemmissa reunoissa,
+          käytävän puolella. */}
+      {ikkunat.map((zi) => (
+        <group key={`verho-${zi}`}>
+          <Verho keskiZ={zi} reuna={-1} x={x - puoli * 0.12} sisaan={-puoli} />
+          <Verho keskiZ={zi} reuna={1} x={x - puoli * 0.12} sisaan={-puoli} />
         </group>
       ))}
 
