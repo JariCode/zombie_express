@@ -10,8 +10,8 @@ export function VaunuValo() {
       intensity={0.7}
       color="#ffe8d0"
       castShadow
-      shadow-mapSize-width={1024}
-      shadow-mapSize-height={1024}
+      shadow-mapSize-width={512}
+      shadow-mapSize-height={512}
       shadow-camera-near={0.5}
       shadow-camera-far={40}
       shadow-camera-left={-6}
