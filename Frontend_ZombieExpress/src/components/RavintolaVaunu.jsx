@@ -28,12 +28,16 @@ const kehysPystyGeo = new THREE.BoxGeometry(0.1, 1.3, 0.1)
 // Yksi ikkunaseinä: pystypalkkeja joiden väliin jää ikkunat.
 // Sama rakenne kuin matkustajavaunussa.
 // puoli = -1 vasen seinä, +1 oikea seinä.
-function IkkunaSeina({ puoli }) {
+// poista = lista ikkunoiden z-kohtia jotka jätetään pois (umpiseinä tilalle).
+function IkkunaSeina({ puoli, poista = [] }) {
   const x = puoli * 3
 
-  // Ikkunat tasavälein vaunun pituudella.
-  const ikkunat = []
-  for (let zi = -15.2; zi <= 15.2; zi += 3.8) ikkunat.push(zi)
+  // Ikkunat tasavälein vaunun pituudella. Poistettavat jätetään pois.
+  const kaikkiIkkunat = []
+  for (let zi = -15.2; zi <= 15.2; zi += 3.8) kaikkiIkkunat.push(zi)
+  const onPoistettu = (zi) => poista.some((p) => Math.abs(p - zi) < 0.1)
+  const ikkunat = kaikkiIkkunat.filter((zi) => !onPoistettu(zi))
+  const umpiIkkunat = kaikkiIkkunat.filter((zi) => onPoistettu(zi))
 
   // Pystypalkit ikkunoiden väleissä.
   const palkit = []
@@ -61,6 +65,13 @@ function IkkunaSeina({ puoli }) {
       {[-18, 18].map((zi) => (
         <RigidBody key={`rako-${zi}`} type="fixed" colliders="cuboid">
           <mesh geometry={rakoGeo} material={seinaMat} position={[x, 1.55, zi]} />
+        </RigidBody>
+      ))}
+
+      {/* Umpiseinä poistettujen ikkunoiden kohdalle (ei reikää). */}
+      {umpiIkkunat.map((zi) => (
+        <RigidBody key={`poistoumpi-${zi}`} type="fixed" colliders="cuboid">
+          <mesh geometry={umpiGeo} material={seinaMat} position={[x, 1.55, zi]} />
         </RigidBody>
       ))}
 
@@ -234,8 +245,10 @@ export function RavintolaVaunu({ z }) {
       ))}
 
       {/* Ikkunaseinät molemmin puolin */}
-      <IkkunaSeina puoli={-1} />
-      <IkkunaSeina puoli={1} />
+      {/* Vasen seinä: poistettu etupään (negatiivinen z) kaksi ikkunaa. */}
+      <IkkunaSeina puoli={-1} poista={[-15.2, -11.4]} />
+      {/* Oikea seinä: poistettu etupään kaksi ja takapään (positiivinen z) yksi. */}
+      <IkkunaSeina puoli={1} poista={[-15.2, -11.4, 15.2]} />
 
       {/* ===== BAARITISKI (oikea reuna, seinän vieressä, käytävä vapaa) ===== */}
 
