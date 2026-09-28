@@ -17,5 +17,8 @@
     "express": "5.2.1",
     "helmet": "8.3.0",
     "mongoose": "9.9.4"
+  },
+  "devDependencies": {
+    "nodemon": "3.1.14"
   }
 }
