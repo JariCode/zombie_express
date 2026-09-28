@@ -1,4 +1,5 @@
 import { RigidBody, CuboidCollider } from '@react-three/rapier'
+import { useRef, useMemo, useLayoutEffect } from 'react'
 import * as THREE from 'three'
 import { Ovi } from './Ovi'
 import { Vessa } from './Vessa'
@@ -27,6 +28,80 @@ const kehysPystyGeo = new THREE.BoxGeometry(0.1, 1.3, 0.1)
 
 // Yksi ikkunaseinä: pystypalkkeja joiden väliin jää ikkunat.
 // Sama rakenne kuin matkustajavaunussa.
+// Ikkunaverhojen jaetut resurssit. Verho tehdään ohuista pystyliuskoista jotka
+// ovat aaltomaisesti eri syvyyksillä (poimutettu kangas), ei laatikkomaisena.
+const verhoMat = new THREE.MeshStandardMaterial({ color: '#2e5a34', roughness: 0.9, side: THREE.DoubleSide })
+const verhoTankoMat = new THREE.MeshStandardMaterial({ color: '#3a3a40', metalness: 0.6, roughness: 0.4 })
+const verhoTankoGeo = new THREE.CylinderGeometry(0.025, 0.025, 3.2, 8)
+
+// Rakennetaan yhtenäinen aaltoileva verhokangas: pystysuora plane jonka
+// verteksit siirretään x-suunnassa siniaallon mukaan (pehmeä poimu, ei
+// kulmikkaita portaita). Jaetaan yksi geometria kummallekin reunalle.
+function teeVerhoGeo(sisaan) {
+  const leveys = 0.9
+  const korkeus = 1.25
+  const segZ = 40 // paljon segmenttejä -> sileä aalto
+  const segY = 1
+  const geo = new THREE.PlaneGeometry(leveys, korkeus, segZ, segY)
+  const pos = geo.attributes.position
+  for (let i = 0; i < pos.count; i++) {
+    const zPos = pos.getX(i) // planen leveysakseli
+    // Poimu: pinta aaltoilee sisään ja ulos leveyssuunnassa.
+    const aalto = Math.sin((zPos / leveys) * Math.PI * 6) * 0.05
+    pos.setZ(i, aalto * sisaan)
+  }
+  geo.computeVertexNormals()
+  // Käännetään plane pystyyn ikkunan eteen (leveysakseli z-suuntaan).
+  geo.rotateY(Math.PI / 2)
+  return geo
+}
+
+const verhoGeoSisaan = teeVerhoGeo(1)
+const verhoGeoUlos = teeVerhoGeo(-1)
+
+// Kaikkien ikkunoiden verhot instansoituna: verhokankaat yhtenä InstancedMesh-
+// objektina ja verhotangot toisena. Näin verhot eivät nosta draw call -määrää
+// ikkunoiden mukaan. sisaan kertoo kumpaan suuntaan poimu kaartuu (riippuu
+// seinän puolesta), joten kummallekin puolelle on oma kangasgeometria.
+function InstanssiVerho({ geo, mat, matriisit }) {
+  const ref = useRef()
+  useLayoutEffect(() => {
+    if (!ref.current) return
+    for (let i = 0; i < matriisit.length; i++) ref.current.setMatrixAt(i, matriisit[i])
+    ref.current.instanceMatrix.needsUpdate = true
+  }, [matriisit])
+  return <instancedMesh ref={ref} args={[geo, mat, matriisit.length]} />
+}
+
+function Verhot({ ikkunat, x, sisaan }) {
+  const { kankaat, tangot } = useMemo(() => {
+    const kangasM = []
+    const tankoM = []
+    const yksi = new THREE.Vector3(1, 1, 1)
+    const eiRot = new THREE.Quaternion()
+    const tankoRot = new THREE.Quaternion().setFromEuler(new THREE.Euler(Math.PI / 2, 0, 0))
+    for (const zi of ikkunat) {
+      for (const reuna of [-1, 1]) {
+        const keskiOffset = reuna === -1 ? -1.0 : 1.0
+        const z = zi + keskiOffset
+        kangasM.push(new THREE.Matrix4().compose(new THREE.Vector3(x + sisaan * 0.06, 1.55, z), eiRot, yksi))
+      }
+      // Yksi tanko per ikkuna (kattaa molemmat reunat).
+      tankoM.push(new THREE.Matrix4().compose(new THREE.Vector3(x + sisaan * 0.06, 2.2, zi), tankoRot, yksi))
+    }
+    return { kankaat: kangasM, tangot: tankoM }
+  }, [ikkunat, x, sisaan])
+
+  const geo = sisaan === 1 ? verhoGeoSisaan : verhoGeoUlos
+
+  return (
+    <group>
+      <InstanssiVerho geo={geo} mat={verhoMat} matriisit={kankaat} />
+      <InstanssiVerho geo={verhoTankoGeo} mat={verhoTankoMat} matriisit={tangot} />
+    </group>
+  )
+}
+
 // puoli = -1 vasen seinä, +1 oikea seinä.
 // poista = lista ikkunoiden z-kohtia jotka jätetään pois (umpiseinä tilalle).
 function IkkunaSeina({ puoli, poista = [] }) {
@@ -99,6 +174,10 @@ function IkkunaSeina({ puoli, poista = [] }) {
           ))}
         </group>
       ))}
+
+      {/* Aaltoilevat verhot jäljellä olevien ikkunoiden molemmissa reunoissa,
+          instansoituna. */}
+      <Verhot ikkunat={ikkunat} x={x - puoli * 0.12} sisaan={-puoli} />
     </group>
   )
 }
